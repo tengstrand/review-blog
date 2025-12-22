@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>The Micro Monolith Architecture</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link type="application/atom+xml" rel="alternate" href="atom.xml" title="The Micro Monolith Architecture">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+      /* Prevent jump by setting padding-top immediately */
+      body { padding-top: 50px !important; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-clojure.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-python.min.js"></script>
+    <script type="text/javascript" src="https://livejs.com/live.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism.min.css">
+
+
+
+    <!-- Social sharing (Facebook, Twitter, LinkedIn, etc.) -->
+    <meta name="title" content="The Micro Monolith Architecture">
+    <meta name="twitter:title" content="The Micro Monolith Architecture">
+    <meta property="og:title" content="The Micro Monolith Architecture">
+    <meta property="og:type" content="website">
+
+
+    <meta name="twitter:url" content="https://tengstrand.github.io/blog/2016-12-28-the-micro-monolith-architecture.html">
+    <meta property="og:url" content="https://tengstrand.github.io/blog/2016-12-28-the-micro-monolith-architecture.html">
+
+
+    <meta name="twitter:image" content="https://tengstrand.github.io/blog/assets/2016-12-28-the-micro-monolith-architecture/monolith.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:image" content="https://tengstrand.github.io/blog/assets/2016-12-28-the-micro-monolith-architecture/monolith.webp">
+    <meta property="og:image:alt" content="">
+
+
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M04G8Y5PWB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-M04G8Y5PWB');
+    </script>
+  </head>
+  <body>
+
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="index.html">Home</a>
+          <a class="page-link" href="archive.html">Archive</a>
+          <a class="page-link" href="tags/index.html">Tags</a>
+          
+	  <a class="page-link" href="atom.xml">
+            Feed
+          </a>
+          
+          
+        </div>
+        <div class="site-header-content">
+          <a href="index.html" style="text-decoration: none;">
+            <img src="assets/summer.jpeg" alt="Summer" class="site-header-image">
+          </a>
+          <div class="site-header-text">
+            <h1 class="site-title">
+              <a class="page-link" href="index.html">Tengstrand&#39;s Blog</a>
+            </h1>
+            <p>The search for simpler code while having fun.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+
+      <h1>
+  
+  The Micro Monolith Architecture
+  
+</h1>
+<div><blockquote style="border-left: 4px solid darkred; color: darkred; margin-left: 0; padding-left: 20px; font-style: italic;">
+Note: 
+The Micro Monolith architecture has been replaced by the <a href="https://polylith.gitbook.io/polylith/">Polylith</a> architecture, which has abandoned symbolic links and dependency injection in favor of simple configuration.
+</blockquote><img src="assets/2016-12-28-the-micro-monolith-architecture/monolith.webp" alt="Micro Monolith Architecture" style="width: 100%; max-width: 600px; height: auto; display: block; margin: 20px 0;"><p>Writing quality software, with thousands or millions of lines of code, is probably one of the most challenging and complex tasks you can undertake. Here I will present an alternative, amazingly simple way of modularising software, complete with <a href="https://github.com/tengstrand/micromonolith">code examples</a> in Java and Clojure!</p><!-- end-of-preview --><p>When a system grows it will eventually reach a point when it becomes hard to manage as a single <a href="https://en.wikipedia.org/wiki/Monolithic_application">monolith</a>. For every line of code that is added, the system becomes harder to understand, change and reuse. <a href="https://en.wikipedia.org/wiki/Microservices">Microservices</a> try to address these problems but also bring extra complexity and an increased cost of integration.</p><p>The core principle in the <em>Micro Monolith</em><sup id="fnref:1"><a href="#fn:1" class="footnote-ref">1</a></sup> architecture is to keep the hardware, software and the data <em>close together</em> in <em>one place</em>. By doing so we can simplify things and get rid of unnecessary coordination. The performance will also be improved if we have direct access to the data from <em>one place</em>. If we design our systems using small, isolated, and composable building blocks (like Microservices) but execute them from <em>one place</em> (like a monolith), we get the best of both worlds.</p><h2 id="how-it-works">How it works</h2><p>Each service is stored as a project in the version control system, with the ability to build its own <a href="https://en.wikipedia.org/wiki/JAR_%28file_format%29">JAR</a> (if running on the <a href="https://en.wikipedia.org/wiki/Java_virtual_machine">JVM</a> — or similar on other platforms). They become the building blocks in the production environment that we use to compose our systems. In the <em>development</em> project we link all the source code from the services, so that we can work directly with the code as if it was a single project.</p><p>Let’s continue by summarising the pros and cons of the Micro Monolith approach:</p><h2 id="pros">Pros</h2><ul><li><em>simplicity</em> — separation of concerns, but with direct code calling, which removes the complexity of networked APIs</li><li><em>excellent performance</em> — no network calls to access services</li><li><em>modular</em> and <em>composable</em> services — reuse across multiple systems</li><li><em>data consistency</em> via <em>cross-service transactions</em> — instead of eventual consistency</li><li><em>reduced devops and hardware/hosting costs</em> — run the system on a single machine</li><li><em>easy to test</em> — the whole system can be tested as one piece</li><li>a <em>faster</em> and <em>more effective development experience</em> — navigate, refactor and debug across services + make changes without rebuilding services</li></ul><h2 id="cons">Cons</h2><ul><li>you “must” use the same programming language in all services (*)</li><li>the development project requires some extra setup (creating the symbolic links)</li><li>your operating system has to support symbolic links<sup id="fnref:2"><a href="#fn:2" class="footnote-ref">2</a></sup></li><li>resources that share the same path must have unique names across all services (if they have different content)</li><li>you lose the built-in version control support in your IDE (because Micro Monolith is probably not supported by your IDE — yet!)<sup id="fnref:3"><a href="#fn:3" class="footnote-ref">3</a></sup></li></ul><p>(*) You are not forced to use only one programming language, but to achieve all the benefits you get from the development setup (like refactoring and debugging across services) then by far the best option is to stick with one language. The second best is to use a mix of languages that can run on the same platform (e.g. the <a href="https://en.wikipedia.org/wiki/Java_virtual_machine">JVM</a>) like Java, Scala, JRuby and Clojure (and C if using the native interface <a href="https://en.wikipedia.org/wiki/Java_Native_Interface">JNI</a>), but then you also need to build a new <a href="https://en.wikipedia.org/wiki/JAR_(file_format)">JAR</a> every time you make a change in a service so that it can be shared to other services. You always have the option to write some of the services as Microservices, but then you lose the benefits that come with the Micro Monolith architecture for these services.</p><p>We have talked about the concepts behind the Micro Monolith approach but not so much about how it works in practice, so let’s do that by showing two code examples in <a href="https://en.wikipedia.org/wiki/Java_(programming_language)">Java</a> and <a href="https://en.wikipedia.org/wiki/Clojure">Clojure</a>. All the code examples can be found <a href="https://github.com/tengstrand/micromonolith">here</a>.<br> Note: in a real system, they would have been stored in separate repositories, isolated from each other, but for convenience they are here stored in a single repository.</p><p>The Java and the Clojure examples implement the same “solution”, a fake REST API that orchestrates a number of services and exposes <em>findAddresses</em>, <em>doUserStuff</em>, and <em>doMoreUserStuff</em>.</p><h2 id="java-—-code-examples">Java — code examples</h2><p>Java is a popular language that we will use to show how the Micro Monolith architecture can look like in an object oriented language.</p><p>The <a href="https://github.com/tengstrand/micromonolith/tree/master/java/development">development</a> project is the place where you will spend most of your time as a developer. Even though all our services are stored as separate version controlled projects (<a href="https://sv.wikipedia.org/wiki/Git">Git</a> in our case) we use a clever trick to bring all the source code together into a single project (<em>one place</em>) by using <a href="https://en.wikipedia.org/wiki/Symbolic_link">symbolic links</a><sup id="fnref:2"><a href="#fn:2" class="footnote-ref">2</a></sup>. The IDE doesn’t care if the directories are “real” or just links, but will mark them with an arrow in the IDE (at least in the one <a href="https://www.jetbrains.com/idea">we use</a> in this example):</p><img src="assets/2016-12-28-the-micro-monolith-architecture/development.webp" alt="Development project structure" style="width: 100%; max-width: 480px; height: auto; display: block; margin: 20px 0;"><p>After the project has been checked out locally, the links will work out of the box in Linux or Unix, but on other platforms you might need to create the development project manually with a script similar to <a href="https://github.com/tengstrand/micromonolith/blob/master/java/development/setup.sh">this</a>.</p><p>With this project setup we achieve all the benefits we normally get from a modern development environment, even <em>across services</em>. That includes <em>debugging</em>, <em>refactoring</em>, and <em>searching</em>. This is very powerful and time saving. We don’t need to rebuild services every time we change the code which makes the workflow very efficient and joyful!</p><h2 id="dependencies">Dependencies</h2><p>When designing the system we need to decide if we allow services to have knowledge about concrete implementations of external libraries or not. In this example we allow that. As a result of that decision, it’s a good idea to use the same version of libraries across all services.</p><p>The other option is to integrate internal services with external libraries by adding interfaces between them. So instead of allowing a service to know about a concrete library like <em>log4j-1.2.17.jar</em>, we instead create the interface <em>log4j-api</em> that the <em>orchestrator</em> service injects<sup id="fnref:2"><a href="#fn:2" class="footnote-ref">2</a></sup> into the services that need it.</p><h2 id="the-orchestrator-service">The orchestrator service</h2><p>The orchestrator service is the place where we put the services together. A system can have more than one orchestrator service, but in this example we only have the <a href="https://github.com/tengstrand/micromonolith/blob/master/java/rest/src/main/java/micromonolith/rest/RestService.java">RestService</a>. Its dependencies to <em>address</em>, <em>email</em>, and <em>user</em> services are specified in <a href="https://github.com/tengstrand/micromonolith/blob/master/java/rest/pom.xml">pom.xml</a>.</p><p>If service <em>A</em> needs to call function <em>f</em> in service <em>B</em>, then function <em>f</em> is injected<sup id="fnref:2"><a href="#fn:2" class="footnote-ref">2</a></sup> into <em>A</em> by the orchestrator service. It’s not mandatory to only inject one function at a time, but it will increase the <em>changeability</em> and the <em>testability</em> by making the services less coupled to each other. We will use the term <em>micro injection</em> when referring to the concept of injecting one function at a time.</p><h2 id="testing">Testing</h2><p>The Micro Monolith architecture encourages testing by making it both simple and easy. Just as with Microservices, it’s easier to test every service in isolation. An advantage compared to Microservices is that it is simpler to test the whole system because it is deployed as a single piece on one machine (our <a href="https://github.com/tengstrand/micromonolith/blob/master/java/rest/src/main/java/micromonolith/rest/RestService.java">REST API</a> in this example).</p><p>This example includes a <em>test data generator</em> that help us set up the database in a known state. You may have a <em>user</em> table with a relationship to the <em>address</em> table. You then may have a <em>UserService</em> and an <em>AddressService</em>. The <a href="https://github.com/tengstrand/micromonolith/tree/master/java/test-data-generator">test-data-generator</a> lets you easily set up a known state of the database, which facilitates the writing of integration tests. This can be done both within a service and across services, for example <a href="https://github.com/tengstrand/micromonolith/blob/master/java/address/src/test/java/micromonolith/address/AddressServiceTest.java">AddressServiceTest</a> and <a href="https://github.com/tengstrand/micromonolith/blob/master/java/user/src/test/java/micromonolith/user/UserServiceTest.java">UserServiceTest</a>.</p><h2 id="clojure-—-code-examples">Clojure — code examples</h2><p><a href="https://en.wikipedia.org/wiki/Clojure">Clojure</a> is a powerful functional language that runs on top of the <a href="https://en.wikipedia.org/wiki/Java_virtual_machine">JVM</a>. We will use Clojure to show how the Micro Monolith architecture can look like in a functional language. All Clojure code can be found <a href="https://github.com/tengstrand/micromonolith/tree/master/clojure">here</a>.</p><p>The <em>development</em> project looks like this:</p><img src="assets/2016-12-28-the-micro-monolith-architecture/development.webp" alt="Development project structure" style="width: 100%; max-width: 480px; height: auto; display: block; margin: 20px 0;"><p>The Clojure version has basically the same structure as the Java version but the functions are stored in namespaces instead of classes. We also don’t need the extra API layer for the address and the email service that we have in Java. As a bonus the Clojure version is less verbose and can do the same job in about 200 lines of code compared to 400 in Java.</p><p>The micro injection is simpler in Clojure and we use the <a href="https://github.com/tengstrand/micromonolith/blob/master/clojure/injection/src/injection/core.clj">inject</a> macro to inject functions. In the example, the function <a href="https://github.com/tengstrand/micromonolith/blob/master/clojure/email/src/email/service.clj">email/send-pdf-email!</a> replaces <a href="https://github.com/tengstrand/micromonolith/blob/master/clojure/user/src/user/service.clj">user.service/send-pdf-email!</a> at line 8 in namespace <a href="https://github.com/tengstrand/micromonolith/blob/master/clojure/rest/src/rest/service.clj">rest.service</a>.</p><h1 id="practical-experience">Practical experience</h1><p>I and the team I work with have used the Micro Monolith architecture in a real production system for a while. We started with a Microservices architecture, where every service had its own repository in Git. The transition to Micro Monolith was very smooth and all we had to do was to <strong>throw away about 30% of the code</strong> in all our services and replace all REST service calls with simple function calls. It was not only the REST parts that disappeared, but also a lot of complexity related to state and error handling.</p><p>In the beginning, the development environment had the same setup as the production environment, where every service was represented as a Java archive (JAR-file). Every time we changed a service, we also had to rebuild the JAR, so that it could be used by other services. Another downside was that we had to restart the <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a> (yes, we use Clojure!). That was time consuming and took away some of the joy of working in a REPL.</p><p>I then came up with the new setup for the development project. After that change we could start the REPL once and then continue working without being interrupted, resulting in happier developers! Another thing we realised was that we had some dead code in our services, marked in grey, that we now could get rid of.</p><p>Another design choice was to use the <a href="http://www.datomic.com/">Datomic</a> database. It fits really well with the Micro Monolith architecture and is both simple and powerful. You can read more about its architecture <a href="http://docs.datomic.com/architecture.html">here</a>.</p><p>We use a test-data-generator from almost every service to simplify setting up integration tests. Some of the naming of variables and functions in that service could be improved. Before the change, we had to manually search and replace occurrences in all our services which was both time-consuming and error-prone. The result was that we avoided to make these small changes. With the new development project we can take advantage of the refactoring support in the IDE to rename variables and functions in a wink!</p><h2 id="summary">Summary</h2><p>The Micro Monolith presents a simpler model of how to build systems. It competes with the Microservice architecture but it doesn’t completely replace it, since the latter definitely has its place. Feel free to use them both if you have the need.</p><p>If you care about simplicity and composability when building systems, then you should definitely give the Micro Monolith architecture a try. Enjoy the efficiency of the development setup and the simplicity of the test and production environment.</p><p>Happy coding!</p><div class="footnotes">
+<ol>
+<li id="fn:1">
+<p>
+In 2017 I gave it the new name <a href="https://polylith.gitbook.io/polylith/">Polylith</a>.
+<a href="#fnref:1" class="footnote-backref">↩</a>
+</p>
+</li>
+<li id="fn:2">
+<p>
+Since October 2020, the new <a href="https://cljdoc.org/d/polylith/clj-poly/CURRENT">poly command line tool</a> uses <a href="https://clojure.org/guides/deps_and_cli">tools.deps</a> instead of <a href="https://en.wikipedia.org/wiki/Symbolic_link">symbolic links</a>.
+<a href="#fnref:2" class="footnote-backref">↩</a>
+</p>
+</li>
+<li id="fn:3">
+<p>
+Today, IDE support is excellent in Clojure, such as <a href="https://cursive-ide.com/userguide/polylith.html">Cursive</a> and <a href="https://calva.io/polylith/">Calva</a>, but there is also support in <a href="https://davidvujic.github.io/python-polylith-docs/">Python</a>.
+<a href="#fnref:3" class="footnote-backref">↩</a>
+</p>
+</li>
+</ol>
+</div></div>
+
+<p><i>Published: 2016-12-28</i></p>
+
+<p>
+  <i>
+  Tagged:
+  
+  <span class="tag">
+    <a href="tags/architecture.html">architecture</a>
+  </span>
+  
+  <span class="tag">
+    <a href="tags/polylith.html">polylith</a>
+  </span>
+  
+  </i>
+</p>
+
+
+<!-- Hypothesis for text-selection comments (Medium-like) -->
+<script src="https://hypothes.is/embed.js" async></script>
+
+<!-- Giscus for discussion comments -->
+<script src="https://giscus.app/client.js"
+        data-repo="tengstrand/blog"
+        data-repo-id="R_kgDOQjTxDg"
+        data-category="Comments"
+        data-category-id="DIC_kwDOQjTxDs4Czh6g"
+        data-mapping="url"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light_high_contrast"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+<noscript>Please enable JavaScript to view the comments powered by Giscus.</noscript>
+
+
+    </div>
+    <script>
+      // Make navigation menu sticky using JavaScript
+      (function() {
+        function initStickyNav() {
+          var nav = document.querySelector('.site-nav');
+          if (!nav) {
+            // Retry after a short delay if nav not found
+            setTimeout(initStickyNav, 100);
+            return;
+          }
+          
+          // Check if already initialized
+          if (document.querySelector('.sticky-nav-wrapper')) return;
+          
+          // Get nav position and dimensions
+          var navRect = nav.getBoundingClientRect();
+          var navTop = navRect.top + window.pageYOffset;
+          
+          // Hide the original nav
+          nav.style.visibility = 'hidden';
+          nav.style.position = 'absolute';
+          
+          // Create a sticky wrapper with full-width background
+          var stickyWrapper = document.createElement('div');
+          stickyWrapper.className = 'sticky-nav-wrapper';
+          stickyWrapper.style.position = 'fixed';
+          stickyWrapper.style.top = '0';
+          stickyWrapper.style.left = '0';
+          stickyWrapper.style.right = '0';
+          stickyWrapper.style.width = '100%';
+          stickyWrapper.style.backgroundColor = 'white';
+          stickyWrapper.style.zIndex = '100';
+          stickyWrapper.style.boxShadow = 'none';
+          stickyWrapper.style.borderTop = 'none';
+          stickyWrapper.style.borderBottom = 'none';
+          
+          // Create inner wrapper for centered content
+          var innerWrapper = document.createElement('div');
+          innerWrapper.style.maxWidth = '600px';
+          innerWrapper.style.margin = '0 auto';
+          innerWrapper.style.padding = '0 15px';
+          innerWrapper.style.width = '100%';
+          innerWrapper.style.boxSizing = 'border-box';
+          innerWrapper.style.paddingTop = '0px';
+          innerWrapper.style.paddingBottom = '2px';
+          innerWrapper.style.borderBottom = '1px solid #e8e8e8';
+          
+          // Add white space below the gray line with a shorter fade
+          stickyWrapper.style.paddingBottom = '8px';
+          stickyWrapper.style.background = 'linear-gradient(to bottom, white 0%, white calc(100% - 8px), transparent 100%)';
+          stickyWrapper.appendChild(innerWrapper);
+          
+          // Clone nav and put it in inner wrapper (always visible)
+          var navClone = nav.cloneNode(true);
+          navClone.style.visibility = 'visible';
+          navClone.style.position = 'static';
+          navClone.style.marginTop = '0';
+          navClone.style.paddingTop = '5px';
+          innerWrapper.appendChild(navClone);
+          document.body.insertBefore(stickyWrapper, document.body.firstChild);
+          
+          // Hide site-header border-top to remove black line
+          var siteHeader = document.querySelector('.site-header');
+          if (siteHeader) {
+            siteHeader.style.borderTop = 'none';
+          }
+          
+          // Set body padding-top immediately to prevent jump
+          var stickyHeight = stickyWrapper.offsetHeight || 50;
+          document.body.style.paddingTop = stickyHeight + 'px';
+        }
+        
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initStickyNav);
+        } else {
+          // Small delay to ensure everything is loaded
+          setTimeout(initStickyNav, 50);
+        }
+      })();
+    </script>
+  </body>
+</html>

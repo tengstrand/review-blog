@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Tengstrand&#39;s Blog - Tag - clojure</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link type="application/atom+xml" rel="alternate" href="../atom.xml" title="Tengstrand&#39;s Blog - Tag - clojure">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+      /* Prevent jump by setting padding-top immediately */
+      body { padding-top: 50px !important; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-clojure.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-python.min.js"></script>
+    <script type="text/javascript" src="https://livejs.com/live.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism.min.css">
+
+
+
+    <!-- Social sharing (Facebook, Twitter, LinkedIn, etc.) -->
+    <meta name="title" content="Tengstrand&#39;s Blog - Tag - clojure">
+    <meta name="twitter:title" content="Tengstrand&#39;s Blog - Tag - clojure">
+    <meta property="og:title" content="Tengstrand&#39;s Blog - Tag - clojure">
+    <meta property="og:type" content="website">
+
+    <meta name="description" content="Posts tagged &quot;clojure&quot; - The search for simpler code while having fun.">
+    <meta name="twitter:description" content="Posts tagged &quot;clojure&quot; - The search for simpler code while having fun.">
+    <meta property="og:description" content="Posts tagged &quot;clojure&quot; - The search for simpler code while having fun.">
+
+
+    <meta name="twitter:url" content="https://tengstrand.github.io/blog/tags/index.html">
+    <meta property="og:url" content="https://tengstrand.github.io/blog/tags/index.html">
+
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://tengstrand.github.io/blog/assets/summer.jpeg">
+    <meta property="og:image" content="https://tengstrand.github.io/blog/assets/summer.jpeg">
+    <meta property="og:image:alt" content="Summer">
+
+
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M04G8Y5PWB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-M04G8Y5PWB');
+    </script>
+  </head>
+  <body>
+
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="../index.html">Home</a>
+          <a class="page-link" href="../archive.html">Archive</a>
+          <a class="page-link" href="../tags/index.html">Tags</a>
+          
+	  <a class="page-link" href="../atom.xml">
+            Feed
+          </a>
+          
+          
+        </div>
+        <div class="site-header-content">
+          <a href="../index.html" style="text-decoration: none;">
+            <img src="../assets/summer.jpeg" alt="Summer" class="site-header-image">
+          </a>
+          <div class="site-header-text">
+            <h1 class="site-title">
+              <a class="page-link" href="../index.html">Tengstrand&#39;s Blog</a>
+            </h1>
+            <p>The search for simpler code while having fun.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+
+      <div style="width: 800px; max-width: 100%;">
+    <h1>Tag - clojure</h1>
+    <ul class="index list-with-icons">
+        
+            <li>
+                <a href="../2025-12-19-tetris-playing-ai-the-polylith-way-1.html" style="text-decoration: none;">
+                    <img src="../assets/2025-12-19-tetris-playing-ai-the-polylith-way/tetris-ai.png" alt="Tetris playing AI using Polylith - Part 1" class="archive-icon" />
+                    <span>Tetris playing AI using Polylith - Part 1 - 2025-12-19</span>
+                </a>
+            </li>
+        
+            <li>
+                <a href="../2018-10-02-how-polylith-came-to-life.html" style="text-decoration: none;">
+                    <img src="../assets/2018-10-02-how-polylith-came-to-life/polylith-logo.png" alt="How Polylith came to life" class="archive-icon" style="height: 27px;" />
+                    <span>How Polylith came to life - 2018-10-02</span>
+                </a>
+            </li>
+        
+    </ul>
+</div>
+
+
+    </div>
+    <script>
+      // Make navigation menu sticky using JavaScript
+      (function() {
+        function initStickyNav() {
+          var nav = document.querySelector('.site-nav');
+          if (!nav) {
+            // Retry after a short delay if nav not found
+            setTimeout(initStickyNav, 100);
+            return;
+          }
+          
+          // Check if already initialized
+          if (document.querySelector('.sticky-nav-wrapper')) return;
+          
+          // Get nav position and dimensions
+          var navRect = nav.getBoundingClientRect();
+          var navTop = navRect.top + window.pageYOffset;
+          
+          // Hide the original nav
+          nav.style.visibility = 'hidden';
+          nav.style.position = 'absolute';
+          
+          // Create a sticky wrapper with full-width background
+          var stickyWrapper = document.createElement('div');
+          stickyWrapper.className = 'sticky-nav-wrapper';
+          stickyWrapper.style.position = 'fixed';
+          stickyWrapper.style.top = '0';
+          stickyWrapper.style.left = '0';
+          stickyWrapper.style.right = '0';
+          stickyWrapper.style.width = '100%';
+          stickyWrapper.style.backgroundColor = 'white';
+          stickyWrapper.style.zIndex = '100';
+          stickyWrapper.style.boxShadow = 'none';
+          stickyWrapper.style.borderTop = 'none';
+          stickyWrapper.style.borderBottom = 'none';
+          
+          // Create inner wrapper for centered content
+          var innerWrapper = document.createElement('div');
+          innerWrapper.style.maxWidth = '600px';
+          innerWrapper.style.margin = '0 auto';
+          innerWrapper.style.padding = '0 15px';
+          innerWrapper.style.width = '100%';
+          innerWrapper.style.boxSizing = 'border-box';
+          innerWrapper.style.paddingTop = '0px';
+          innerWrapper.style.paddingBottom = '2px';
+          innerWrapper.style.borderBottom = '1px solid #e8e8e8';
+          
+          // Add white space below the gray line with a shorter fade
+          stickyWrapper.style.paddingBottom = '8px';
+          stickyWrapper.style.background = 'linear-gradient(to bottom, white 0%, white calc(100% - 8px), transparent 100%)';
+          stickyWrapper.appendChild(innerWrapper);
+          
+          // Clone nav and put it in inner wrapper (always visible)
+          var navClone = nav.cloneNode(true);
+          navClone.style.visibility = 'visible';
+          navClone.style.position = 'static';
+          navClone.style.marginTop = '0';
+          navClone.style.paddingTop = '5px';
+          innerWrapper.appendChild(navClone);
+          document.body.insertBefore(stickyWrapper, document.body.firstChild);
+          
+          // Hide site-header border-top to remove black line
+          var siteHeader = document.querySelector('.site-header');
+          if (siteHeader) {
+            siteHeader.style.borderTop = 'none';
+          }
+          
+          // Set body padding-top immediately to prevent jump
+          var stickyHeight = stickyWrapper.offsetHeight || 50;
+          document.body.style.paddingTop = stickyHeight + 'px';
+        }
+        
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initStickyNav);
+        } else {
+          // Small delay to ensure everything is loaded
+          setTimeout(initStickyNav, 50);
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,473 @@
+body {
+  /* Inter - Sans-serif optimized for UI */
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 300;
+  margin: 0;
+  padding: 0;
+  color: rgba(41, 41, 41, 1);
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+h1, h2, h3, h4 {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 500;
+  color: rgba(41, 41, 41, 1);
+}
+
+h1 {
+  font-size: 1.6em;
+  margin-top: 0;
+}
+
+h2 {
+  font-size: 1.5em;
+}
+
+h3 {
+  font-size: 1.4em;
+}
+
+h4 {
+  font-size: 1.3em;
+  margin-top: 0.6em;
+  margin-bottom: 0.4em;
+}
+
+a {
+  color: #003366;
+  text-decoration: underline;
+}
+
+.wrapper {
+  max-width: 600px;
+  margin: 0 auto 0 auto;
+  padding: 0 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+h2 {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+p {
+  margin-top: 0.2em;
+}
+
+.site-header {
+  border-top: 2px solid #424242;
+  border-bottom: none;
+  min-height: 55.95px;
+  position: relative;
+  width: 100%;
+}
+
+.site-header .wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.site-title {
+  margin: 0;
+  margin-bottom: 0.4em;
+  font-size: 1.8em;
+}
+
+.site-title,
+.site-title a {
+  line-height: 1.15;
+}
+
+.site-header-text p {
+  line-height: 1.5;
+  margin-top: 0;
+}
+
+/* Tags page styling */
+.tags-page h1 {
+  font-size: 1.6em !important;
+}
+
+.tags-page ul.index {
+  font-size: 1em !important;
+}
+
+.site-header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0;
+  padding-bottom: 20px;
+  order: 2;
+}
+
+.site-header-image {
+  width: 140px;
+  height: 140px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.site-header-image:hover {
+  opacity: 0.85;
+}
+
+.site-header-text {
+  flex: 1;
+}
+
+.site-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  line-height: 1.5;
+  margin: 0;
+  margin-top: 20px;
+  padding: 0;
+  padding-bottom: 0;
+  order: 1;
+}
+
+.site-nav .page-link {
+  color: #424242;
+}
+
+.site-nav .page-link:not(:last-child) {
+  margin-right: 0;
+  }
+  
+.site-nav-bottom {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  line-height: 1.5;
+  margin: 0;
+  margin-top: 2em;
+  padding: 0;
+  justify-content: flex-start;
+}
+
+.site-nav-bottom .page-link {
+  color: #424242;
+  text-decoration: none;
+}
+
+.page-link {
+  text-decoration: none;
+  vertical-align: middle;
+}
+
+.page-icon {
+  vertical-align: middle;
+}
+
+ul.index {
+  list-style: none;
+  padding-left: 0;
+}
+
+.index li {
+  margin-bottom: 1em;
+}
+
+.tags-page ul.index li {
+  display: block;
+  white-space: nowrap;
+}
+
+.tags-page ul.index li span {
+  display: inline;
+}
+
+.tags-page ul.index li span a {
+  display: inline;
+}
+
+.list-with-icons li a {
+  /* Force consistent alignment regardless of icon size */
+  display: grid !important;
+  grid-template-columns: 32px 1fr;
+  column-gap: 10px;
+  align-items: center;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.list-with-icons li a img.archive-icon {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.list-with-icons li a span {
+  grid-column: 2;
+  text-align: left;
+}
+
+.archive-icon {
+  height: 18px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.visitor-icon {
+  height: 25px;
+  width: 25px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+code {
+  white-space: pre;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.9em;
+  font-weight: 600;
+  line-height: 0.95;
+}
+
+/* Keep code blocks bold */
+pre code {
+  font-weight: bold;
+}
+
+pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.85em;
+  font-weight: bold;
+  line-height: 1.2 !important;
+  background-color: #f5f5f5;
+  padding: 1em;
+  border-radius: 4px;
+  margin-top: 0;
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+pre code,
+pre code[class*="language-"],
+code[class*="language-"],
+pre[class*="language-"] {
+  font-size: 0.85em !important;
+  line-height: 1.2 !important;
+}
+
+pre[class*="language-"],
+pre code[class*="language-"] {
+  background-color: #f5f5f5 !important;
+}
+
+/* Light theme for Clojure code blocks - inspired by One Light with high readability */
+pre[class*="language-clojure"],
+pre code[class*="language-clojure"] {
+  background-color: #f5f5f5 !important;
+  color: #383a42 !important;
+}
+
+pre[class*="language-clojure"] code,
+pre code[class*="language-clojure"] {
+  background-color: transparent !important;
+  color: #383a42 !important;
+}
+
+/* Clojure syntax highlighting - clear, readable colors */
+pre[class*="language-clojure"] .token.keyword,
+pre code[class*="language-clojure"] .token.keyword {
+  color: #a626a4 !important; /* Purple/magenta */
+  font-weight: 600;
+}
+
+pre[class*="language-clojure"] .token.string,
+pre code[class*="language-clojure"] .token.string {
+  color: #50a14f !important; /* Green */
+}
+
+pre[class*="language-clojure"] .token.function,
+pre code[class*="language-clojure"] .token.function {
+  color: #4078f2 !important; /* Blue */
+}
+
+pre[class*="language-clojure"] .token.number,
+pre code[class*="language-clojure"] .token.number {
+  color: #50a14f !important; /* Green - same as strings */
+}
+
+pre[class*="language-clojure"] .token.comment,
+pre code[class*="language-clojure"] .token.comment {
+  color: #a0a1a7 !important; /* Gray */
+  font-style: italic;
+}
+
+pre[class*="language-clojure"] .token.operator,
+pre code[class*="language-clojure"] .token.operator {
+  color: #0184bc !important; /* Cyan/blue */
+}
+
+pre[class*="language-clojure"] .token.punctuation,
+pre code[class*="language-clojure"] .token.punctuation {
+  color: #383a42 !important; /* Dark gray */
+}
+
+pre[class*="language-clojure"] .token.boolean,
+pre code[class*="language-clojure"] .token.boolean {
+  color: #0184bc !important; /* Cyan/blue */
+}
+
+pre[class*="language-clojure"] .token.symbol,
+pre code[class*="language-clojure"] .token.symbol {
+  color: #383a42 !important; /* Dark gray */
+}
+
+/* Light theme for Python code blocks - same colors as Clojure for consistency */
+pre[class*="language-python"],
+pre code[class*="language-python"] {
+  background-color: #f5f5f5 !important;
+  color: #383a42 !important;
+}
+
+pre[class*="language-python"] code,
+pre code[class*="language-python"] {
+  background-color: transparent !important;
+  color: #383a42 !important;
+}
+
+/* Python syntax highlighting - same colors as Clojure */
+pre[class*="language-python"] .token.keyword,
+pre code[class*="language-python"] .token.keyword {
+  color: #a626a4 !important; /* Purple/magenta */
+  font-weight: 600;
+}
+
+pre[class*="language-python"] .token.string,
+pre code[class*="language-python"] .token.string {
+  color: #50a14f !important; /* Green */
+}
+
+pre[class*="language-python"] .token.function,
+pre code[class*="language-python"] .token.function {
+  color: #4078f2 !important; /* Blue */
+}
+
+pre[class*="language-python"] .token.number,
+pre code[class*="language-python"] .token.number {
+  color: #50a14f !important; /* Green - same as strings */
+}
+
+pre[class*="language-python"] .token.comment,
+pre code[class*="language-python"] .token.comment {
+  color: #a0a1a7 !important; /* Gray */
+  font-style: italic;
+}
+
+pre[class*="language-python"] .token.operator,
+pre code[class*="language-python"] .token.operator {
+  color: #0184bc !important; /* Cyan/blue */
+}
+
+pre[class*="language-python"] .token.punctuation,
+pre code[class*="language-python"] .token.punctuation {
+  color: #383a42 !important; /* Dark gray */
+}
+
+pre[class*="language-python"] .token.boolean,
+pre code[class*="language-python"] .token.boolean {
+  color: #0184bc !important; /* Cyan/blue */
+}
+
+blockquote {
+  border-left: 4px solid #ccc;
+  margin-left: 0;
+  padding-left: 20px;
+  color: rgba(41, 41, 41, 0.8);
+  font-style: italic;
+}
+
+/* Spacing between blog posts on index page */
+.blog-post-spacer {
+  height: 2em;
+  display: block;
+}
+
+.blog-post h1 {
+  margin-top: 1em !important;
+}
+
+.blog-post:first-child h1 {
+  margin-top: 0.5em !important;
+}
+
+/* Prevent horizontal scrolling on mobile */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure all content respects container width */
+* {
+  box-sizing: border-box;
+}
+
+pre, code {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.sticky-nav-wrapper {
+  border-bottom: none !important;
+  border-top: none !important;
+  box-shadow: none !important;
+}
+
+.sticky-nav-wrapper .site-nav {
+  margin-top: 0 !important;
+  padding-top: 8px !important;
+}
+
+/* Hide site-header border-top when sticky nav is active */
+body:has(.sticky-nav-wrapper) .site-header {
+  border-top: none !important;
+}
+
+/* Underline blog post titles on hover */
+.blog-post h1 a {
+  text-decoration: none !important;
+}
+
+.blog-post h1 a:hover {
+  text-decoration: underline !important;
+}
+
+/* Make first image in blog posts clickable */
+.blog-post > div > a > img,
+.blog-post > a > img {
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.blog-post > div > a:hover > img,
+.blog-post > a:hover > img {
+  opacity: 0.85;
+}
