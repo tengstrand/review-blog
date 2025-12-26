@@ -3,7 +3,7 @@
   <title>Tengstrand's Blog</title>
   <link href="https://tengstrand.github.io/blog/atom.xml" rel="self"/>
   <link href="https://tengstrand.github.io/blog/"/>
-  <updated>2025-12-26T15:36:30+00:00</updated>
+  <updated>2025-12-26T16:58:56+00:00</updated>
   <id>https://tengstrand.github.io/blog/</id>
   <author>
     <name>Joakim Tengstrand</name>
@@ -13,7 +13,7 @@
     <link href="https://tengstrand.github.io/blog/2025-12-19-tetris-playing-ai-the-polylith-way-1.html"/>
     <title>Tetris playing AI using Polylith - Part 1</title>
     <updated>2025-12-19T23:59:59+00:00</updated>
-    <content type="html"><![CDATA[<div><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/tetris-ai.png" alt="Tetris AI" style="width: 50%; max-width: 220px; height: auto; display: block; margin: 16px 0;"><p>In this blog series, I will show how to work with <a href="(https://polylith.gitbook.io/polylith/)">Polylith</a> and how organizing code into components helps create a good structure for high-level functional style programming.</p><p>You might feel that organizing into components is unnecessary, and yes, for a tiny codebase like this I would agree. It&apos;s still easy to reason about the code and keep everything in mind, but as the codebase grows, so does the value of this structure, in terms of better overview, clearer system boundaries, and increased flexibility in how these building blocks can be combined into different systems.</p><p>We will get familiar with this by implementing a self-playing <a href="https://en.wikipedia.org/wiki/Tetris">Tetris</a> program in <a href="https://en.wikipedia.org/wiki/Clojure">Clojure</a> and <a href="https://en.wikipedia.org/wiki/Python_(programming_language)">Python</a> while reflecting on the differences between the two languages.</p><!-- end-of-preview --><h2 id="the-goal">The goal</h2><p>The task for this first post is to place a <code>T</code> piece on a Tetris board (represented by a two-dimensional array):</p><pre><code class="language-clojure">[[0,0,0,0,0,0,0,0,0,0]
+    <content type="html"><![CDATA[<div><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/tetris-ai.png" alt="Tetris AI" style="width: 50%; max-width: 220px; height: auto; display: block; margin: 16px 0;"><p>In this blog series, I will show how to work with the <a href="(https://polylith.gitbook.io/polylith/)">Polylith</a> architecture and how organizing code into components helps create a good structure for high-level functional style programming.</p><p>You might feel that organizing into components is unnecessary, and yes, for a tiny codebase like this I would agree. It&apos;s still easy to reason about the code and keep everything in mind, but as the codebase grows, so does the value of this structure, in terms of better overview, clearer system boundaries, and increased flexibility in how these building blocks can be combined into different systems.</p><p>We will get familiar with this by implementing a self-playing <a href="https://en.wikipedia.org/wiki/Tetris">Tetris</a> program in <a href="https://en.wikipedia.org/wiki/Clojure">Clojure</a> and <a href="https://en.wikipedia.org/wiki/Python_(programming_language)">Python</a> while reflecting on the differences between the two languages.</p><!-- end-of-preview --><h2 id="the-goal">The goal</h2><p>The task for this first post is to place a <code>T</code> piece on a Tetris board (represented by a two-dimensional array):</p><pre><code class="language-clojure">[[0,0,0,0,0,0,0,0,0,0]
  [0,0,0,0,0,0,0,0,0,0]
  [0,0,0,0,0,0,0,0,0,0]
  [0,0,0,0,0,0,0,0,0,0]
@@ -258,25 +258,25 @@ def set_piece(board, p, x, y, piece):
   (let [row-list (repeat width 0) ;; (0 0 0 0)
         row (vec row-list)        ;; [0 0 0 0]
         rows (repeat height row)  ;; ([0 0 0 0] [0 0 0 0])
-        board (vec row-lists)]    ;; [[0 0 0 0] [0 0 0 0]]
+        board (vec rows)]    ;; [[0 0 0 0] [0 0 0 0]]
     board))
 </code></pre><p>We convert the lists to vectors using the <a href="https://clojuredocs.org/clojure.core/vec">vec</a> function, so that we (later) can access it via index.</p><h3 id="empty-board-2">empty_board</h3><pre><code class="language-python">def empty_board(width, height):
     return [[0] * width for _ in range(height)]
 </code></pre><p>This can be rewritten as:</p><pre><code class="language-python">def empty_board(width, height): # width = 4, height = 2
     row = [0] * width           # row = [0, 0, 0, 0]
-    rows = range(height)        # rows = lazy sequence of [0, 1]
+    rows = range(height)        # rows = lazy sequence with the length of 2
     board = [row for _ in rows] # board = [[0, 0, 0, 0], [0, 0, 0, 0]]
     return board
 </code></pre><p>The <code>[row for _ in rows]</code> statement is a <a href="https://www.geeksforgeeks.org/python/python-list-comprehension/">list comprehension</a> and is a way to create data structures in Python by looping.</p><p>We loop twice through <code>range(height)</code>, which yields the values 0 and 1, but we&apos;re not interested in these values, so we use the <code>_</code> placeholder.</p><h3 id="set-cell">set-cell</h3><pre><code class="language-clojure">(defn set-cell [board p x y [cx cy]]
   (assoc-in board [(+ y cy) (+ x cx)] p))
-</code></pre><p>Let&apos;s break it down, and call it with:</p><pre><code class="language-clojure">board = [[0 0 0 0] [0 0 0 0]] 
+</code></pre><p>Let&apos;s break it down into an alternative implementation and call it with:</p><pre><code class="language-clojure">board = [[0 0 0 0] [0 0 0 0]] 
 p = 6, x = 2, y = 0, cell = [0 1])
 </code></pre><pre><code class="language-clojure">(defn set-cell [board p x y cell]
   (let [[cx cy] cell ;; Destructures [0 1] into cx = 0, cy = 1
         xx (+ x cx)  ;; xx = 2 + 0 = 2
         yy (+ y cy)] ;; yy = 0 + 1 = 1
     (assoc-in board [yy xx] p))) ;; [[0 0 0 0] [0 0 6 0]]
-</code></pre><p>In the original version, <a href="https://clojure.org/guides/destructuring">destructuring</a> of <code>[cx cy]</code> happens directly in the parameter list. The <code>assoc-in</code> function works like <code>board[y][x]</code> in Python in this example, with the difference that it doesn&apos;t mutate, but instead returns a new immutable result.</p><h3 id="set-cell-2">set_cell</h3><pre><code class="language-python">def set_cell(board, p, x, y, cell):
+</code></pre><p>In the original version, <a href="https://clojure.org/guides/destructuring">destructuring</a> of <code>[cx cy]</code> happens directly in the function&apos;s parameter list. The <code>assoc-in</code> function works like <code>board[y][x]</code> in Python in this example, with the difference that it doesn&apos;t mutate, but instead returns a new immutable board.</p><h3 id="set-cell-2">set_cell</h3><pre><code class="language-python">def set_cell(board, p, x, y, cell):
     cx, cy = cell
     board[y + cy][x + cx] = p  # [[0,0,0,0] [0,0,6,0]]
 </code></pre><p>As mentioned earlier, this code mutates the two-dimensional list in place. It doesn&apos;t return anything, which differs from the Clojure version that returns a new board with one cell changed.</p><h3 id="set-piece">set-piece</h3><pre><code class="language-clojure">(defn set-piece [board p x y piece]
