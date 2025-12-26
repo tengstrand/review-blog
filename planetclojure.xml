@@ -3,7 +3,7 @@
   <title>Tengstrand's Blog</title>
   <link href="https://tengstrand.github.io/blog/atom.xml" rel="self"/>
   <link href="https://tengstrand.github.io/blog/"/>
-  <updated>2025-12-22T10:15:22+00:00</updated>
+  <updated>2025-12-26T15:36:30+00:00</updated>
   <id>https://tengstrand.github.io/blog/</id>
   <author>
     <name>Joakim Tengstrand</name>
@@ -13,22 +13,22 @@
     <link href="https://tengstrand.github.io/blog/2025-12-19-tetris-playing-ai-the-polylith-way-1.html"/>
     <title>Tetris playing AI using Polylith - Part 1</title>
     <updated>2025-12-19T23:59:59+00:00</updated>
-    <content type="html"><![CDATA[<div><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/tetris-ai.png" alt="Tetris AI" style="width: 50%; max-width: 220px; height: auto; display: block; margin: 16px 0;"><p>In this blog series, I will implement a self-playing <a href="https://en.wikipedia.org/wiki/Tetris">Tetris</a> program in <a href="https://en.wikipedia.org/wiki/Clojure">Clojure</a> and <a href="https://en.wikipedia.org/wiki/Python_(programming_language)">Python</a> using the <a href="https://polylith.gitbook.io/polylith/">Polylith architecture</a> and compare the two solutions along the way.</p><!-- end-of-preview --><h2 id="the-goal">The goal</h2><p>The goal for this first post is to place a <code>T</code> piece on a Tetris board (represented by a two-dimensional array):</p><pre><code class="language-clojure">[[0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 T 0 0 0]
- [0 0 0 0 0 T T T 0 0]]]
-</code></pre><p>We will put the code in the <code>piece</code> and <code>board</code> components in a Polylith <a href="https://cljdoc.org/d/polylith/clj-poly/CURRENT/doc/workspace">workspace</a> (output from the <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/reference/commands#info">info</a> command):</p><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/poly-info.png" alt="Poly info output" style="width: 60%; max-width: 250px; height: auto; display: block; margin: 10px 0;"><p>This will not be a complete guide to Polylith, Clojure, or Python, but I will explain the most important parts and refer to relevant documentation when needed.</p><p>The resulting source code from this blog post (part 1) can be found here:</p><ul><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-01/langs/clojure/tetris-polylith">Clojure workspace</a></li><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-01/langs/python/tetris-polylith-uv">Python workspace</a></li></ul><h2 id="workspace">Workspace</h2><p>We begin by installing the <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/readme">poly</a> command line tool for Clojure, which we will use when working with the Polylith codebase:</p><pre><code class="language-shell">brew install polyfy/polylith/poly
+    <content type="html"><![CDATA[<div><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/tetris-ai.png" alt="Tetris AI" style="width: 50%; max-width: 220px; height: auto; display: block; margin: 16px 0;"><p>In this blog series, I will show how to work with <a href="(https://polylith.gitbook.io/polylith/)">Polylith</a> and how organizing code into components helps create a good structure for high-level functional style programming.</p><p>You might feel that organizing into components is unnecessary, and yes, for a tiny codebase like this I would agree. It&apos;s still easy to reason about the code and keep everything in mind, but as the codebase grows, so does the value of this structure, in terms of better overview, clearer system boundaries, and increased flexibility in how these building blocks can be combined into different systems.</p><p>We will get familiar with this by implementing a self-playing <a href="https://en.wikipedia.org/wiki/Tetris">Tetris</a> program in <a href="https://en.wikipedia.org/wiki/Clojure">Clojure</a> and <a href="https://en.wikipedia.org/wiki/Python_(programming_language)">Python</a> while reflecting on the differences between the two languages.</p><!-- end-of-preview --><h2 id="the-goal">The goal</h2><p>The task for this first post is to place a <code>T</code> piece on a Tetris board (represented by a two-dimensional array):</p><pre><code class="language-clojure">[[0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,0,0,0,0]
+ [0,0,0,0,0,0,T,0,0,0]
+ [0,0,0,0,0,T,T,T,0,0]]
+</code></pre><p>We will put the code in the <code>piece</code> and <code>board</code> components in a Polylith <a href="https://cljdoc.org/d/polylith/clj-poly/CURRENT/doc/workspace">workspace</a> (output from the <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/reference/commands#info">info</a> command):</p><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/poly-info.png" alt="Poly info output" style="width: 60%; max-width: 250px; height: auto; display: block; margin: 10px 0;"><p>This will not be a complete guide to Polylith, Clojure, or Python, but I will explain the most important parts and refer to relevant documentation when needed.</p><p>The resulting source code from this first blog post in the series can be found here:</p><ul><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-01/langs/clojure/tetris-polylith">Clojure workspace</a></li><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-01/langs/python/tetris-polylith-uv">Python workspace</a></li></ul><h2 id="workspace">Workspace</h2><p>We begin by installing the <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/readme">poly</a> command line tool for Clojure, which we will use when working with the Polylith codebase:</p><pre><code class="language-shell">brew install polyfy/polylith/poly
 </code></pre><p>The next step is to create a Polylith <a href="https://cljdoc.org/d/polylith/clj-poly/0.2.22/doc/workspace">workspace</a>:</p><pre><code class="language-shell">poly create workspace name:tetris-polylith top-ns:tetrisanalyzer
 </code></pre><p>We now have a standard Polylith workspace for Clojure in place:</p><pre><code class="language-shell">▾ tetris-polylith
   ▸ bases
@@ -65,7 +65,7 @@ uv.lock
         ▾ tetrisanalyzer
           ▾ piece
             interface-test.clj
-</code></pre><p>If you have used Polylith with Clojure before, you know that you also need to manually add <code>piece</code> to <code>deps.edn</code>, which is described <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/component#create-component">here</a>.</p><h4 id="python-2">Python</h4><p>Let&apos;s do the same for Python:</p><pre><code class="language-shell">uv run poly create component --name piece
+</code></pre><p>If you have used Polylith with Clojure before, you know that you also need to manually add <code>piece</code> to <a href="https://github.com/tengstrand/tetrisanalyzer/blob/polylith-blog-part-01/langs/clojure/tetris-polylith/deps.edn">deps.edn</a>, which is described <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/component#create-component">here</a>.</p><h4 id="python-2">Python</h4><p>Let&apos;s do the same for Python:</p><pre><code class="language-shell">uv run poly create component --name piece
 </code></pre><p>This adds the <code>piece</code> component to the structure:</p><pre><code class="language-shell">  ▾ components
     ▾ tetrisanalyzer
       ▾ piece
@@ -181,7 +181,7 @@ def piece(p, rotation):
         ▾ tetrisanalyzer
           ▾ piece
             interface.clj
-</code></pre><p>which is implemented like this:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.interface
+</code></pre><p>Implemented like this:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.interface
   (:require [tetrisanalyzer.piece.shape :as shape]))
 
 (def I 1)
@@ -218,6 +218,16 @@ type(Z)    # Returns &lt;class &apos;int&apos;&gt; (since Z is bound to 2)
     ▸ piece
   ▸ development
   ▸ projects
+</code></pre><p>And this is how we create a <code>board</code> component in Python:</p><pre><code class="language-shell">uv run poly create component --name board
+</code></pre><p>This adds the <code>board</code> component to the workspace:</p><pre><code class="language-shell">  ▾ components
+    ▾ tetrisanalyzer
+      ▸ board
+      ▸ piece
+  ▾ test
+    ▾ components
+      ▾ tetrisanalyzer
+        ▸ board
+        ▸ piece
 </code></pre><p>The Clojure code that places a piece on the board is implemented like this:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.core)
 
 (defn empty-board [width height]
@@ -231,17 +241,7 @@ type(Z)    # Returns &lt;class &apos;int&apos;&gt; (since Z is bound to 2)
             (set-cell board p x y cell))
           board
           piece))
-</code></pre><p>For Clojure newcomers: the last parameter of <code>set-cell</code> uses <a href="https://clojure.org/guides/destructuring">destructuring</a> to extract the first two elements from the vector argument <code>[cx cy]</code> into <code>cx</code> and <code>cy</code>.</p><h4 id="python-4">Python</h4><p>Now let&apos;s create the <code>board</code> component for Python:</p><pre><code class="language-shell">uv run poly create component --name board
-</code></pre><p>This adds the <code>board</code> component to the workspace:</p><pre><code class="language-shell">  ▾ components
-    ▾ tetrisanalyzer
-      ▸ board
-      ▸ piece
-  ▾ test
-    ▾ components
-      ▾ tetrisanalyzer
-        ▸ board
-        ▸ piece
-</code></pre><p>The implementation looks like this in Python:</p><pre><code class="language-python">def empty_board(width, height):
+</code></pre><p>In Python:</p><pre><code class="language-python">def empty_board(width, height):
     return [[0] * width for _ in range(height)]
 
 def set_cell(board, p, x, y, cell):
@@ -252,7 +252,43 @@ def set_piece(board, p, x, y, piece):
     for cell in piece:
         set_cell(board, p, x, y, cell)
     return board
-</code></pre><p>The test looks like this:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.core-test
+</code></pre><p>Let&apos;s go through these functions.</p><h3 id="empty-board">empty-board</h3><pre><code class="language-clojure">(defn empty-board [width height]
+  (vec (repeat height (vec (repeat width 0)))))
+</code></pre><p>To explain this function, we can break it down into smaller statements:</p><pre><code class="language-clojure">(defn empty-board [width height]  ;; [4 2]
+  (let [row-list (repeat width 0) ;; (0 0 0 0)
+        row (vec row-list)        ;; [0 0 0 0]
+        rows (repeat height row)  ;; ([0 0 0 0] [0 0 0 0])
+        board (vec row-lists)]    ;; [[0 0 0 0] [0 0 0 0]]
+    board))
+</code></pre><p>We convert the lists to vectors using the <a href="https://clojuredocs.org/clojure.core/vec">vec</a> function, so that we (later) can access it via index.</p><h3 id="empty-board-2">empty_board</h3><pre><code class="language-python">def empty_board(width, height):
+    return [[0] * width for _ in range(height)]
+</code></pre><p>This can be rewritten as:</p><pre><code class="language-python">def empty_board(width, height): # width = 4, height = 2
+    row = [0] * width           # row = [0, 0, 0, 0]
+    rows = range(height)        # rows = lazy sequence of [0, 1]
+    board = [row for _ in rows] # board = [[0, 0, 0, 0], [0, 0, 0, 0]]
+    return board
+</code></pre><p>The <code>[row for _ in rows]</code> statement is a <a href="https://www.geeksforgeeks.org/python/python-list-comprehension/">list comprehension</a> and is a way to create data structures in Python by looping.</p><p>We loop twice through <code>range(height)</code>, which yields the values 0 and 1, but we&apos;re not interested in these values, so we use the <code>_</code> placeholder.</p><h3 id="set-cell">set-cell</h3><pre><code class="language-clojure">(defn set-cell [board p x y [cx cy]]
+  (assoc-in board [(+ y cy) (+ x cx)] p))
+</code></pre><p>Let&apos;s break it down, and call it with:</p><pre><code class="language-clojure">board = [[0 0 0 0] [0 0 0 0]] 
+p = 6, x = 2, y = 0, cell = [0 1])
+</code></pre><pre><code class="language-clojure">(defn set-cell [board p x y cell]
+  (let [[cx cy] cell ;; Destructures [0 1] into cx = 0, cy = 1
+        xx (+ x cx)  ;; xx = 2 + 0 = 2
+        yy (+ y cy)] ;; yy = 0 + 1 = 1
+    (assoc-in board [yy xx] p))) ;; [[0 0 0 0] [0 0 6 0]]
+</code></pre><p>In the original version, <a href="https://clojure.org/guides/destructuring">destructuring</a> of <code>[cx cy]</code> happens directly in the parameter list. The <code>assoc-in</code> function works like <code>board[y][x]</code> in Python in this example, with the difference that it doesn&apos;t mutate, but instead returns a new immutable result.</p><h3 id="set-cell-2">set_cell</h3><pre><code class="language-python">def set_cell(board, p, x, y, cell):
+    cx, cy = cell
+    board[y + cy][x + cx] = p  # [[0,0,0,0] [0,0,6,0]]
+</code></pre><p>As mentioned earlier, this code mutates the two-dimensional list in place. It doesn&apos;t return anything, which differs from the Clojure version that returns a new board with one cell changed.</p><h3 id="set-piece">set-piece</h3><pre><code class="language-clojure">(defn set-piece [board p x y piece]
+  (reduce (fn [board cell]
+            (set-cell board p x y cell))
+          board   ;; An empty board as initial value
+          piece)) ;; cells: [[1 0] [0 1] [1 1] [2 1]]
+</code></pre><p>If you are new to <a href="https://clojuredocs.org/clojure.core/reduce">reduce</a>, think of it as a recursive function that processes each element in a collection, accumulating a result as it goes. The initial call to <code>set-cell</code> will use an empty board and the first <code>[1 0]</code> cell from <code>piece</code>, then use the returned <code>board</code> from <code>set-cell</code> and the second cell <code>[0 1]</code> from <code>piece</code> to call <code>set-cell</code> again, and continue like that until it has applied all cells in <code>piece</code>, where it returns a new board.</p><h3 id="set-piece-2">set_piece</h3><pre><code class="language-python">def set_piece(board, p, x, y, piece):
+    for cell in piece:
+        set_cell(board, p, x, y, cell)
+    return board
+</code></pre><p>The Python version is pretty straight forward, with a for loop that mutates the board. We choose to return the board to make the function more flexible, allowing it to be used in expressions and enabling method chaining, which is a common Python pattern, even though the board is already mutated in place.</p><h2 id="test">Test</h2><p>The test looks like this in Clojure:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.core-test
   (:require [clojure.test :refer :all]
             [tetrisanalyzer.piece.interface :as piece]
             [tetrisanalyzer.board.core :as board]))
@@ -300,7 +336,7 @@ def set_piece(board, p, x, y, piece):
             [0 0 0 0 0 T T T 0 0]]
            (board/set-piece empty-board T x y piece-t)))))
 </code></pre><p>Let&apos;s <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/testing">execute the tests</a> to check that everything works as expected:</p><pre><code class="language-shell">poly test :dev
-</code></pre><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/poly-test.png" alt="Poly test output" style="width: 500px; height: auto; display: block; margin: 20px 0;"><p>The tests passed!</p><h4 id="python-5">Python</h4><p>Now, let&apos;s add a Python test for the <code>board</code>:</p><pre><code class="language-python">from tetrisanalyzer import piece
+</code></pre><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/poly-test.png" alt="Poly test output" style="width: 500px; height: auto; display: block; margin: 20px 0;"><p>The tests passed!</p><h4 id="python-4">Python</h4><p>Now, let&apos;s add a Python test for the <code>board</code>:</p><pre><code class="language-python">from tetrisanalyzer import piece
 from tetrisanalyzer.board import board
 
 empty_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
