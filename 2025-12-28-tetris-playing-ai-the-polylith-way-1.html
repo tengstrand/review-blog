@@ -346,9 +346,9 @@ def set_piece(board, p, x, y, piece):
 </code></pre><p>Let&apos;s break it down into an alternative implementation and call it with:</p><pre><code class="language-clojure">board = [[0 0 0 0] [0 0 0 0]] 
 p = 6, x = 2, y = 0, cell = [0 1])
 </code></pre><pre><code class="language-clojure">(defn set-cell [board p x y cell]
-  (let [[cx cy] cell ;; Destructures [0 1] into cx = 0, cy = 1
-        xx (+ x cx)  ;; xx = 2 + 0 = 2
-        yy (+ y cy)] ;; yy = 0 + 1 = 1
+  (let [[cx cy] cell             ;; Destructures [0 1] into cx = 0, cy = 1
+        xx (+ x cx)              ;; xx = 2 + 0 = 2
+        yy (+ y cy)]             ;; yy = 0 + 1 = 1
     (assoc-in board [yy xx] p))) ;; [[0 0 0 0] [0 0 6 0]]
 </code></pre><p>In the original version, <a href="https://clojure.org/guides/destructuring">destructuring</a> of <code>[cx cy]</code> happens directly in the function&apos;s parameter list. The <code>assoc-in</code> function works like <code>board[y][x]</code> in Python in this example, with the difference that it doesn&apos;t mutate, but instead returns a new immutable board.</p><h3 id="set-cell-2">set_cell</h3><pre><code class="language-python">def set_cell(board, p, x, y, cell):
     cx, cy = cell
