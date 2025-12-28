@@ -3,7 +3,7 @@
   <title>Tengstrand's Blog</title>
   <link href="https://tengstrand.github.io/blog/atom.xml" rel="self"/>
   <link href="https://tengstrand.github.io/blog/"/>
-  <updated>2025-12-28T16:18:43+00:00</updated>
+  <updated>2025-12-28T18:35:04+00:00</updated>
   <id>https://tengstrand.github.io/blog/</id>
   <author>
     <name>Joakim Tengstrand</name>
@@ -261,9 +261,9 @@ def set_piece(board, p, x, y, piece):
   (let [row-list (repeat width 0) ;; (0 0 0 0)
         row (vec row-list)        ;; [0 0 0 0]
         rows (repeat height row)  ;; ([0 0 0 0] [0 0 0 0])
-        board (vec rows)]    ;; [[0 0 0 0] [0 0 0 0]]
+        board (vec rows)]         ;; [[0 0 0 0] [0 0 0 0]]
     board))
-</code></pre><p>We convert the lists to vectors using the <a href="https://clojuredocs.org/clojure.core/vec">vec</a> function, so that we (later) can access it via index.</p><h3 id="empty-board-2">empty_board</h3><pre><code class="language-python">def empty_board(width, height):
+</code></pre><p>We convert the lists to vectors using the <a href="https://clojuredocs.org/clojure.core/vec">vec</a> function, so that we (later) can access it via index. Note that it is the last value in the function (<code>board</code>) that is returned.</p><h3 id="empty-board-2">empty_board</h3><pre><code class="language-python">def empty_board(width, height):
     return [[0] * width for _ in range(height)]
 </code></pre><p>This can be rewritten as:</p><pre><code class="language-python">def empty_board(width, height): # width = 4, height = 2
     row = [0] * width           # row = [0, 0, 0, 0]
