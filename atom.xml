@@ -3,17 +3,17 @@
   <title>Tengstrand's Blog</title>
   <link href="https://tengstrand.github.io/blog/atom.xml" rel="self"/>
   <link href="https://tengstrand.github.io/blog/"/>
-  <updated>2025-12-28T18:35:04+00:00</updated>
+  <updated>2025-12-28T18:46:53+00:00</updated>
   <id>https://tengstrand.github.io/blog/</id>
   <author>
     <name>Joakim Tengstrand</name>
   </author>
   <entry>
-    <id>https://tengstrand.github.io/blog/2025-12-19-tetris-playing-ai-the-polylith-way-1.html</id>
-    <link href="https://tengstrand.github.io/blog/2025-12-19-tetris-playing-ai-the-polylith-way-1.html"/>
+    <id>https://tengstrand.github.io/blog/2025-12-28-tetris-playing-ai-the-polylith-way-1.html</id>
+    <link href="https://tengstrand.github.io/blog/2025-12-28-tetris-playing-ai-the-polylith-way-1.html"/>
     <title>Tetris playing AI using Polylith - Part 1</title>
-    <updated>2025-12-19T23:59:59+00:00</updated>
-    <content type="html"><![CDATA[<div><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/tetris-ai.png" alt="Tetris AI" style="width: 50%; max-width: 220px; height: auto; display: block; margin: 16px 0;"><p>In this blog series, I will show how to work with the <a href="(https://polylith.gitbook.io/polylith/)">Polylith</a> architecture and how organizing code into components helps create a good structure for high-level functional style programming.</p><p>You might feel that organizing into components is unnecessary, and yes, for a tiny codebase like this I would agree. It&apos;s still easy to reason about the code and keep everything in mind, but as the codebase grows, so does the value of this structure, in terms of better overview, clearer system boundaries, and increased flexibility in how these building blocks can be combined into various systems.</p><p>We will get familiar with this by implementing a self-playing <a href="https://en.wikipedia.org/wiki/Tetris">Tetris</a> program in <a href="https://en.wikipedia.org/wiki/Clojure">Clojure</a> and <a href="https://en.wikipedia.org/wiki/Python_(programming_language)">Python</a> while reflecting on the differences between the two languages.</p><!-- end-of-preview --><h2 id="the-goal">The goal</h2><p>The task for this first post is to place a <code>T</code> piece on a Tetris board (represented by a two-dimensional array):</p><pre><code class="language-clojure">[[0,0,0,0,0,0,0,0,0,0]
+    <updated>2025-12-28T23:59:59+00:00</updated>
+    <content type="html"><![CDATA[<div><img src="assets/2025-12-28-tetris-playing-ai-the-polylith-way/tetris-ai.png" alt="Tetris AI" style="width: 50%; max-width: 220px; height: auto; display: block; margin: 16px 0;"><p>In this blog series, I will show how to work with the <a href="(https://polylith.gitbook.io/polylith/)">Polylith</a> architecture and how organizing code into components helps create a good structure for high-level functional style programming.</p><p>You might feel that organizing into components is unnecessary, and yes, for a tiny codebase like this I would agree. It&apos;s still easy to reason about the code and keep everything in mind, but as the codebase grows, so does the value of this structure, in terms of better overview, clearer system boundaries, and increased flexibility in how these building blocks can be combined into various systems.</p><p>We will get familiar with this by implementing a self-playing <a href="https://en.wikipedia.org/wiki/Tetris">Tetris</a> program in <a href="https://en.wikipedia.org/wiki/Clojure">Clojure</a> and <a href="https://en.wikipedia.org/wiki/Python_(programming_language)">Python</a> while reflecting on the differences between the two languages.</p><!-- end-of-preview --><h2 id="the-goal">The goal</h2><p>The task for this first post is to place a <code>T</code> piece on a Tetris board (represented by a two-dimensional array):</p><pre><code class="language-clojure">[[0,0,0,0,0,0,0,0,0,0]
  [0,0,0,0,0,0,0,0,0,0]
  [0,0,0,0,0,0,0,0,0,0]
  [0,0,0,0,0,0,0,0,0,0]
@@ -28,7 +28,7 @@
  [0,0,0,0,0,0,0,0,0,0]
  [0,0,0,0,0,0,T,0,0,0]
  [0,0,0,0,0,T,T,T,0,0]]
-</code></pre><p>We will put the code in the <code>piece</code> and <code>board</code> components in a Polylith <a href="https://cljdoc.org/d/polylith/clj-poly/CURRENT/doc/workspace">workspace</a> (output from the <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/reference/commands#info">info</a> command):</p><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/poly-info.png" alt="Poly info output" style="width: 60%; max-width: 250px; height: auto; display: block; margin: 10px 0;"><p>This will not be a complete guide to Polylith, Clojure, or Python, but I will explain the most important parts and refer to relevant documentation when needed.</p><p>The resulting source code from this first blog post in the series can be found here:</p><ul><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-01/langs/clojure/tetris-polylith">Clojure workspace</a></li><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-01/langs/python/tetris-polylith-uv">Python workspace</a></li></ul><h2 id="workspace">Workspace</h2><p>We begin by installing the <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/readme">poly</a> command line tool for Clojure, which we will use when working with the Polylith codebase:</p><pre><code class="language-shell">brew install polyfy/polylith/poly
+</code></pre><p>We will put the code in the <code>piece</code> and <code>board</code> components in a Polylith <a href="https://cljdoc.org/d/polylith/clj-poly/CURRENT/doc/workspace">workspace</a> (output from the <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/reference/commands#info">info</a> command):</p><img src="assets/2025-12-28-tetris-playing-ai-the-polylith-way/part1/poly-info.png" alt="Poly info output" style="width: 60%; max-width: 250px; height: auto; display: block; margin: 10px 0;"><p>This will not be a complete guide to Polylith, Clojure, or Python, but I will explain the most important parts and refer to relevant documentation when needed.</p><p>The resulting source code from this first blog post in the series can be found here:</p><ul><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-01/langs/clojure/tetris-polylith">Clojure workspace</a></li><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-01/langs/python/tetris-polylith-uv">Python workspace</a></li></ul><h2 id="workspace">Workspace</h2><p>We begin by installing the <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/readme">poly</a> command line tool for Clojure, which we will use when working with the Polylith codebase:</p><pre><code class="language-shell">brew install polyfy/polylith/poly
 </code></pre><p>The next step is to create a Polylith <a href="https://cljdoc.org/d/polylith/clj-poly/0.2.22/doc/workspace">workspace</a>:</p><pre><code class="language-shell">poly create workspace name:tetris-polylith top-ns:tetrisanalyzer
 </code></pre><p>We now have a standard Polylith workspace for Clojure in place:</p><pre><code class="language-shell">▾ tetris-polylith
   ▸ bases
@@ -77,7 +77,7 @@ uv.lock
         ▾ piece
           __init__.py
           test_core.py
-</code></pre><h4 id="piece-shapes">Piece shapes</h4><p>In Tetris, there are 7 different pieces that can be rotated, summing up to 19 shapes:</p><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/pieces.png" alt="Pieces" style="width: 100%; max-width: 500px; height: auto; display: block; margin: 20px 0;"><p>Here we will store them in a multi-dimensional array where each possible piece shape is made up of four <code>[x,y]</code> cells, with <code>[0,0]</code> representing the upper left corner.</p><p>For example the <code>Z</code> piece in its inital position (rotation 0) consists of the cells <code>[0,0] [1,0] [1,1] [2,1]</code>:</p><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/z-piece.png" alt="Z piece" style="width: 100%; max-width: 100px; height: auto; display: block; margin: 20px 0;"><p>This is how it looks like in Clojure (commas are treated as white spaces in Clojure and are often omitted):</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.piece)
+</code></pre><h4 id="piece-shapes">Piece shapes</h4><p>In Tetris, there are 7 different pieces that can be rotated, summing up to 19 shapes:</p><img src="assets/2025-12-28-tetris-playing-ai-the-polylith-way/part1/pieces.png" alt="Pieces" style="width: 100%; max-width: 500px; height: auto; display: block; margin: 20px 0;"><p>Here we will store them in a multi-dimensional array where each possible piece shape is made up of four <code>[x,y]</code> cells, with <code>[0,0]</code> representing the upper left corner.</p><p>For example the <code>Z</code> piece in its inital position (rotation 0) consists of the cells <code>[0,0] [1,0] [1,1] [2,1]</code>:</p><img src="assets/2025-12-28-tetris-playing-ai-the-polylith-way/part1/z-piece.png" alt="Z piece" style="width: 100%; max-width: 100px; height: auto; display: block; margin: 20px 0;"><p>This is how it looks like in Clojure (commas are treated as white spaces in Clojure and are often omitted):</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.piece)
 
 (def pieces [nil
 
@@ -339,7 +339,7 @@ p = 6, x = 2, y = 0, cell = [0 1])
             [0 0 0 0 0 T T T 0 0]]
            (board/set-piece empty-board T x y piece-t)))))
 </code></pre><p>Let&apos;s <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/testing">execute the tests</a> to check that everything works as expected:</p><pre><code class="language-shell">poly test :dev
-</code></pre><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/poly-test.png" alt="Poly test output" style="width: 500px; height: auto; display: block; margin: 20px 0;"><p>The tests passed!</p><h4 id="python-4">Python</h4><p>Now, let&apos;s add a Python test for the <code>board</code>:</p><pre><code class="language-python">from tetrisanalyzer import board, piece
+</code></pre><img src="assets/2025-12-28-tetris-playing-ai-the-polylith-way/part1/poly-test.png" alt="Poly test output" style="width: 500px; height: auto; display: block; margin: 20px 0;"><p>The tests passed!</p><h4 id="python-4">Python</h4><p>Now, let&apos;s add a Python test for the <code>board</code>:</p><pre><code class="language-python">from tetrisanalyzer import board, piece
 
 empty_board = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -391,16 +391,16 @@ def test_set_piece():
     assert expected == board.set_piece(empty_board, T, x, y, piece_t)
 </code></pre><p>Let&apos;s install and run the tests using <a href="https://docs.pytest.org/en/stable/">pytest</a>:</p><pre><code class="language-shell">uv add pytest --dev
 </code></pre><p>And run the tests:</p><pre><code class="language-shell">uv run pytest
-</code></pre><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/pytest.png" alt="Pytest output" style="width: 550px; height: auto; display: block; margin: 20px 0;"><p>With that, we have finished the first post in this blog series!</p><p>If you&apos;re eager to see a self-playing Tetris program, I happen to have made a couple in other languages that you can watch <a href="https://github.com/tengstrand/tetrisanalyzer">here</a>.</p><a href="https://github.com/tengstrand/tetrisanalyzer" style="text-decoration: none; display: block; margin-top: -15px;">
+</code></pre><img src="assets/2025-12-28-tetris-playing-ai-the-polylith-way/part1/pytest.png" alt="Pytest output" style="width: 550px; height: auto; display: block; margin: 20px 0;"><p>With that, we have finished the first post in this blog series!</p><p>If you&apos;re eager to see a self-playing Tetris program, I happen to have made a couple in other languages that you can watch <a href="https://github.com/tengstrand/tetrisanalyzer">here</a>.</p><a href="https://github.com/tengstrand/tetrisanalyzer" style="text-decoration: none; display: block; margin-top: -15px;">
 <div style="display: flex; gap: 20px; align-items: stretch; margin: -5px 0 -20px 0;">
   <div style="height: 200px; display: flex; align-items: center;">
-    <img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/tetris-analyzer-scala.png" alt="Tetris Analyzer Scala" style="height: 200px; width: auto; object-fit: contain; display: block;">
+    <img src="assets/2025-12-28-tetris-playing-ai-the-polylith-way/part1/tetris-analyzer-scala.png" alt="Tetris Analyzer Scala" style="height: 200px; width: auto; object-fit: contain; display: block;">
   </div>
   <div style="height: 200px; display: flex; align-items: center;">
-    <img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/tetris-analyzer-cpp.png" alt="Tetris Analyzer C++" style="height: 200px; width: auto; object-fit: contain; display: block;">
+    <img src="assets/2025-12-28-tetris-playing-ai-the-polylith-way/part1/tetris-analyzer-cpp.png" alt="Tetris Analyzer C++" style="height: 200px; width: auto; object-fit: contain; display: block;">
   </div>
   <div style="height: 200px; display: flex; align-items: center;">
-    <img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/tetris-analyzer-tool.png" alt="Tetris Analyzer Tool" style="height: 200px; width: auto; object-fit: contain; display: block;">
+    <img src="assets/2025-12-28-tetris-playing-ai-the-polylith-way/part1/tetris-analyzer-tool.png" alt="Tetris Analyzer Tool" style="height: 200px; width: auto; object-fit: contain; display: block;">
   </div>
 </div>
 </a><p>Happy Coding!</p></div>]]></content>
