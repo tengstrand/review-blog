@@ -3,7 +3,7 @@
   <title>Tengstrand's Blog</title>
   <link href="https://tengstrand.github.io/blog/atom.xml" rel="self"/>
   <link href="https://tengstrand.github.io/blog/"/>
-  <updated>2025-12-26T16:58:56+00:00</updated>
+  <updated>2025-12-28T15:38:44+00:00</updated>
   <id>https://tengstrand.github.io/blog/</id>
   <author>
     <name>Joakim Tengstrand</name>
@@ -166,6 +166,7 @@ L = 5
 T = 6
 O = 7
 
+
 def piece(p, rotation):
     return shape.pieces[p][rotation]
 </code></pre><p>The <code>piece</code> component now has these files:</p><pre><code class="language-shell">▾ tetris-polylith-uv
@@ -244,9 +245,11 @@ type(Z)    # Returns &lt;class &apos;int&apos;&gt; (since Z is bound to 2)
 </code></pre><p>In Python:</p><pre><code class="language-python">def empty_board(width, height):
     return [[0] * width for _ in range(height)]
 
+
 def set_cell(board, p, x, y, cell):
     cx, cy = cell
     board[y + cy][x + cx] = p
+
 
 def set_piece(board, p, x, y, piece):
     for cell in piece:
@@ -336,24 +339,25 @@ p = 6, x = 2, y = 0, cell = [0 1])
             [0 0 0 0 0 T T T 0 0]]
            (board/set-piece empty-board T x y piece-t)))))
 </code></pre><p>Let&apos;s <a href="https://cljdoc.org/d/polylith/clj-poly/0.3.31/doc/testing">execute the tests</a> to check that everything works as expected:</p><pre><code class="language-shell">poly test :dev
-</code></pre><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/poly-test.png" alt="Poly test output" style="width: 500px; height: auto; display: block; margin: 20px 0;"><p>The tests passed!</p><h4 id="python-4">Python</h4><p>Now, let&apos;s add a Python test for the <code>board</code>:</p><pre><code class="language-python">from tetrisanalyzer import piece
-from tetrisanalyzer.board import board
+</code></pre><img src="assets/2025-12-19-tetris-playing-ai-the-polylith-way/part1/poly-test.png" alt="Poly test output" style="width: 500px; height: auto; display: block; margin: 20px 0;"><p>The tests passed!</p><h4 id="python-4">Python</h4><p>Now, let&apos;s add a Python test for the <code>board</code>:</p><pre><code class="language-python">from tetrisanalyzer import board, piece
 
-empty_board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-               [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+empty_board = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+]
 
 
 def test_empty_board():
@@ -366,21 +370,24 @@ def test_set_piece():
     piece_t = piece.piece(T, rotate_two_times)
     x = 5
     y = 13
-    expected = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, T, 0, 0, 0],
-                [0, 0, 0, 0, 0, T, T, T, 0, 0]]
+    expected = [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, T, 0, 0, 0],
+        [0, 0, 0, 0, 0, T, T, T, 0, 0],
+    ]
+
     assert expected == board.set_piece(empty_board, T, x, y, piece_t)
 </code></pre><p>Let&apos;s install and run the tests using <a href="https://docs.pytest.org/en/stable/">pytest</a>:</p><pre><code class="language-shell">uv add pytest --dev
 </code></pre><p>And run the tests:</p><pre><code class="language-shell">uv run pytest
