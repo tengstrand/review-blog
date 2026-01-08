@@ -3,7 +3,7 @@
   <title>Tengstrand's Blog</title>
   <link href="https://tengstrand.github.io/blog/atom.xml" rel="self"/>
   <link href="https://tengstrand.github.io/blog/"/>
-  <updated>2026-01-08T09:53:44+00:00</updated>
+  <updated>2026-01-08T10:11:03+00:00</updated>
   <id>https://tengstrand.github.io/blog/</id>
   <author>
     <name>Joakim Tengstrand</name>
@@ -239,7 +239,7 @@ empty_rows + remaining_rows # [[0,0,0,0,0,0,0,0,0,0],
 (def empty-rows (repeat num-cleared-rows empty-row)])
 </code></pre><p>Vilket jag översatte till:</p><pre><code class="language-python">empty_row = [0 for _ in range(board_width)]
 empty_rows = [empty_row for _ in range(num_cleared_rows)]
-</code></pre><p>Problemet med Python-koden är att <code>empty_rows</code> refererar till en och samma <code>empty_row</code> och om den sistnämda ändras, så ändras alla rader i <code>empty_rows</code>, vilket blir ett problem om <code>num_cleared_rows</code> är större än ett.</p><p>I den nya lösningen skapar vi i stället helt nya rader i Python, medan vi i Clojure kan dela på samma rad då den är immutable. Att allt är immutable i Clojure är en stor fördel när vi låter datat flöda genom systemet, då det hindrar datat från att sprida sig till andra delar längre ner i flödet, på ett okontrollerat sätt.</p><h3 id="sätta-ihop">Sätta ihop</h3><p>Låt oss sätta ihop allting till en funktion:</p><pre><code class="language-python">from tetrisanalyzer.board.core import empty_board
+</code></pre><p>Problemet med Python-koden är att <code>empty_rows</code> refererar till en och samma <code>empty_row</code> och om den sistnämda ändras, så ändras alla rader i <code>empty_rows</code>, vilket blir ett problem om <code>num_cleared_rows</code> är större än ett.</p><p>I den nya lösningen skapar vi i stället helt nya rader i Python, medan vi i Clojure kan dela på samma rad då den är immutable. Att allt är immutable i Clojure är en stor fördel när vi låter datat flöda genom systemet, då det hindrar datat från att sprida sig okontrollerat till andra delar längre ner i flödet.</p><h3 id="sätta-ihop">Sätta ihop</h3><p>Låt oss sätta ihop allting till en funktion:</p><pre><code class="language-python">from tetrisanalyzer.board.core import empty_board
 
 
 def is_incomplete(row):
