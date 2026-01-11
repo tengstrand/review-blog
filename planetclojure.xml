@@ -3,7 +3,7 @@
   <title>Tengstrand's Blog</title>
   <link href="https://tengstrand.github.io/blog/atom.xml" rel="self"/>
   <link href="https://tengstrand.github.io/blog/"/>
-  <updated>2026-01-08T11:58:24+00:00</updated>
+  <updated>2026-01-11T15:43:33+00:00</updated>
   <id>https://tengstrand.github.io/blog/</id>
   <author>
     <name>Joakim Tengstrand</name>
@@ -12,12 +12,12 @@
     <id>https://tengstrand.github.io/blog/06-tetris-playing-ai-the-polylith-way-2.html</id>
     <link href="https://tengstrand.github.io/blog/06-tetris-playing-ai-the-polylith-way-2.html"/>
     <title>Tetris-playing AI the Polylith way - Part 2</title>
-    <updated>2026-01-08T23:59:59+00:00</updated>
-    <content type="html"><![CDATA[<div><img src="assets/06-tetris-playing-ai-the-polylith-way/tetris-ai.png" alt="Tetris AI" style="width: 50%; max-width: 220px; height: auto; display: block; margin: 16px 0;"><p>Fokus i denna andra del i bloggserien är att visa på fördelarna med att få snabb återkoppling när du jobbar med kod. Sättet vi gör det på är att implementera borttagning av hela rader när en Tetris-bit placeras på sin plats.</p><!-- end-of-preview --><p>For example, if we rotate the red piece in the image above and place it in the third position, the two bottom rows should be cleared:</p><div style="display: flex; align-items: center; margin: 20px 0; max-width: 322px;">
+    <updated>2026-01-11T23:59:59+00:00</updated>
+    <content type="html"><![CDATA[<div><img src="assets/06-tetris-playing-ai-the-polylith-way/tetris-ai.png" alt="Tetris AI" style="width: 50%; max-width: 220px; height: auto; display: block; margin: 16px 0;"><p>The focus in this second part of the blog series is to showcase the benefits of getting quick feedback when working with code. We&apos;ll do this by implementing the removal of complete rows when a Tetris piece is placed on the board.</p><!-- end-of-preview --><p>For example, if we rotate the red piece in the image above and place it in the third position, the two bottom rows should be cleared:</p><div style="display: flex; align-items: center; margin: 20px 0; max-width: 322px;">
   <img src="assets/06-tetris-playing-ai-the-polylith-way/tetris-ai-placed.png" alt="Tetris AI with piece dropped" style="width: calc(50% - 20px); height: auto; display: block;">
   <img src="assets/06-tetris-playing-ai-the-polylith-way/right-arrow.png" alt="Right arrow" style="width: 20px; height: auto; display: block; flex-shrink: 0; margin: 0 10px;">
   <img src="assets/06-tetris-playing-ai-the-polylith-way/tetris-ai-cleared.png" alt="Tetris AI with cleared rows" style="width: calc(50% - 20px); height: auto; display: block;">
-</div><p>The resulting source code from this second blog post in the series can be found here:</p><ul><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/tetris-part2/langs/clojure/tetris-polylith">Clojure workspace</a></li><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/tetris-part2/langs/python/tetris-polylith-uv">Python workspace</a></li></ul><h2 id="repl-driven-utveckling">REPL-driven utveckling</h2><p>Om du läst <a href="05-tetris-playing-ai-the-polylith-way-1.html">del ett</a> i bloggserien, så vet du redan att all kod kommer att implementeras i både Python och Clojure, så låt oss börja med det senare!</p><p>Clojure har något som kallas <a href="https://clojure.org/guides/repl/introduction">REPL</a> (Read Eval Print Loop) som låter dig skriva koden i små steg, samtidigt som du får snabb återkoppling huruvida koden fungerar eller ej.</p><p>Vi börjar med att skapa ett <code>clear-rows</code> namespace i board-komponenten:</p><pre><code class="language-shell">▾ tetris-polylith
+</div><p>The resulting source code from this second blog post in the series can be found here:</p><ul><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-02/langs/clojure/tetris-polylith">Clojure workspace</a></li><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-02/langs/python/tetris-polylith-uv">Python workspace</a></li></ul><h2 id="repl-driven-development">REPL-driven development</h2><p>If you&apos;ve read <a href="05-tetris-playing-ai-the-polylith-way-1.html">part one</a> of the blog series, you already know that all code will be implemented in both Python and Clojure, so let&apos;s start with the latter!</p><p>Clojure has something called a <a href="https://clojure.org/guides/repl/introduction">REPL</a> (Read Eval Print Loop) that lets you write code in small steps, while getting quick feedback on whether the code works or not.</p><p>We&apos;ll start by creating a <code>clear-rows</code> namespace in the board component:</p><pre><code class="language-shell">▾ tetris-polylith
   ▸ bases
   ▾ components
     ▾ board
@@ -29,16 +29,16 @@
     ▸ piece
   ▸ development
   ▸ projects
-</code></pre><p>Där vi lägger till en board <code>row</code>:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.clear-rows)
+</code></pre><p>Where we add a board <code>row</code>:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.clear-rows)
 
 (def row [1 1 1 0 1 1 1 0 1 1])
-</code></pre><p>I Clojure behöver vi bara kompilera den kod som ändrats. Då vi lagt till ett nytt namespace och en <code>row</code> behöver vi därför skicka hela namespacet till REPLn, vanligtvis via en key-shortcut, för att få det kompilerat till <a href="https://en.wikipedia.org/wiki/Java_bytecode">Java bytekod</a>.</p><p>En komplett rad innehåller inga tomma celler (nollor). Vi kan använda funktionen <a href="https://clojuredocs.org/clojure.core/some">some</a> för att detektera förekomsten av tomma celler:</p><pre><code class="language-clojure">(some zero? row) ;; true
-</code></pre><p>Här har minst en tom cell hittats, vilket betyder att raden ej är komplett. Låt oss även testa huruvida vi kan identifiera en komplett rad:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.clear-rows)
+</code></pre><p>In Clojure, we only need to compile the code that has changed. Since we&apos;ve added a new namespace and a <code>row</code>, we need to send the entire namespace to the REPL, usually via a key-shortcut, to get it compiled to <a href="https://en.wikipedia.org/wiki/Java_bytecode">Java bytecode</a>.</p><p>A complete row contains no empty cells (zeros). We can use the <a href="https://clojuredocs.org/clojure.core/some">some</a> function to detect the presence of empty cells:</p><pre><code class="language-clojure">(some zero? row) ;; true
+</code></pre><p>Here at least one empty cell has been found, which means the row is not complete. Let&apos;s also test whether we can identify a complete row:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.clear-rows)
 
 (def row [1 1 1 1 1 1 1 1 1 1])
 
 (some zero? row) ;; false
-</code></pre><p>Ja, det verkar fungera.</p><p>Nu kan vi skapa en funktion av koden:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.clear-rows)
+</code></pre><p>Yes, it seems to work!</p><p>Now we can create a function from the code:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.clear-rows)
 
 (defn incomplete-row? [row]
   (some zero? row))
@@ -47,7 +47,7 @@
   (incomplete-row? [1 1 1 1 1 1 1 0 1 1]) ;; true
   (incomplete-row? [1 1 1 1 1 1 1 1 1 1]) ;; false
   #__)
-</code></pre><p>Här har jag lagt till ett <a href="https://clojuredocs.org/clojure.core/comment">comment</a>-block med ett par anropa till funktionen. Från utvecklingsmiljön kan vi nu anropa en funktion i taget och direkt se resultatet, samtidigt som funktionerna inte körs om vi skulle ladda om namespacet. Det är ganska vanligt i Clojure-världen att dessa kommentarsblock lämnas kvar i produktionskoden så att funktioner lätt kan anropas, samtidigt som de fungerar som dokumentation.</p><p>Vi städar bort kommentarsblocket och lägger istället till en <code>board</code> så att vi har något att testa mot (kommatecken kan utelämnas):</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.clear-rows)
+</code></pre><p>Here I&apos;ve added a <a href="https://clojuredocs.org/clojure.core/comment">comment</a> block with a couple of calls to the function. From the development environment, we can now call one function at a time and immediately see the result, while the functions don&apos;t run if we reload the namespace. It&apos;s quite common in the Clojure world to leave these comment blocks in production code so that functions can be easily called, while also serving as documentation.</p><p>We&apos;ll clean up the comment block and instead add a <code>board</code> so we have something to test against (commas can be omitted):</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.clear-rows)
 
 (defn incomplete-row? [row]
   (some zero? row))
@@ -58,32 +58,32 @@
             [1 1 1 1 1 1 0 0 1 1]
             [1 0 1 1 1 1 1 1 1 1]
             [1 1 1 1 1 1 1 1 1 1]])
-</code></pre><p>Nu kan vi räkna fram de rader som ej ska tas bort:</p><pre><code class="language-clojure">(def remaining-rows (filter incomplete-row? board)) ;; ([0 0 0 0 0 0 0 0 0 0]
+</code></pre><p>Now we can calculate the rows that should not be removed:</p><pre><code class="language-clojure">(def remaining-rows (filter incomplete-row? board)) ;; ([0 0 0 0 0 0 0 0 0 0]
                                                     ;;  [0 0 0 0 0 0 0 0 0 0]
                                                     ;;  [1 1 1 1 1 1 0 0 1 1] 
                                                     ;;  [1 0 1 1 1 1 1 1 1 1])
-</code></pre><p>Nästa steg är att skapa de två tomma raderna som ska ersätta de borttagna, vilka vi slutligen lägger i <code>empty-rows</code>:</p><pre><code class="language-clojure">(def board-width (count (first board)))
+</code></pre><p>The next step is to create the two empty rows that should replace the removed ones, which we finally put in <code>empty-rows</code>:</p><pre><code class="language-clojure">(def board-width (count (first board)))
 (def board-height (count board))
 (def num-cleared-rows (- board-height (count remaining-rows))) ;; 2
 (def empty-row (vec (repeat board-width 0))) ;; [0 0 0 0 0 0 0 0 0 0]
 (def empty-rows (repeat num-cleared-rows empty-row)) ;; ([0 0 0 0 0 0 0 0 0 0] [0 0 0 0 0 0 0 0 0 0])
-</code></pre><p>Så här ser board:et ut efter att kompletta rader tagits bort och nya tomma ersättningsrader lagts till i början:</p><pre><code class="language-clojure">(vec (concat empty-rows remaining-rows)) ;; [[0 0 0 0 0 0 0 0 0 0]
+</code></pre><p>Here&apos;s what the board looks like after complete rows have been removed and new empty replacement rows have been added at the beginning:</p><pre><code class="language-clojure">(vec (concat empty-rows remaining-rows)) ;; [[0 0 0 0 0 0 0 0 0 0]
                                          ;;  [0 0 0 0 0 0 0 0 0 0]
                                          ;;  [0 0 0 0 0 0 0 0 0 0]
                                          ;;  [0 0 0 0 0 0 0 0 0 0]
                                          ;;  [1 1 1 1 1 1 0 0 1 1]
                                          ;;  [1 0 1 1 1 1 1 1 1 1]]
-</code></pre><p>Funktionen <a href="https://clojuredocs.org/clojure.core/concat">concat</a> lägger ihop de två listorna och skapar en ny lista med rader, medan <a href="https://clojuredocs.org/clojure.core/vec">vec</a> därefter gör om listan till en vektor. Notera att både <code>vec</code> och <code>concat</code> returnerar <a href="https://clojure.org/reference/data_structures">immutable data</a>, vilket är standard för alla datastrukturer i Clojure.</p><h3 id="förenkla">Förenkla</h3><p>Det slog mig att vi kan förenkla koden något.</p><p>Vi börjar med att göra <code>empty-board</code> något mer läsbar genom att lägga till <code>empty-row</code>:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.core)
+</code></pre><p>The <a href="https://clojuredocs.org/clojure.core/concat">concat</a> function combines the two lists and creates a new list with rows, while <a href="https://clojuredocs.org/clojure.core/vec">vec</a> then converts the list to a vector. Note that both <code>vec</code> and <code>concat</code> return <a href="https://clojure.org/reference/data_structures">immutable data</a>, which is standard for all data structures in Clojure.</p><h3 id="simplify">Simplify</h3><p>It occurred to me that we can simplify the code somewhat.</p><p>We&apos;ll start by making <code>empty-board</code> a bit more readable by adding <code>empty-row</code>:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.core)
 
 (defn empty-row [width]
   (vec (repeat width 0)))
 
 (defn empty-board [width height]
   (vec (repeat height (empty-row width))))
-</code></pre><p>Därefter kan vi ersätta:</p><pre><code class="language-clojure">(def empty-row (vec (repeat board-width 0)))
+</code></pre><p>Then we can replace:</p><pre><code class="language-clojure">(def empty-row (vec (repeat board-width 0)))
 (def empty-rows (repeat num-cleared-rows empty-row))
-</code></pre><p>Med:</p><pre><code class="language-clojure">(def empty-rows (core/empty-board board-width num-cleared-rows))
-</code></pre><p>Nu kan vi slutligen använda <a href="https://clojuredocs.org/clojure.core/let">let</a> för att plockar ihop de olika beräkningsstegen till en funktion:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.clear-rows
+</code></pre><p>With:</p><pre><code class="language-clojure">(def empty-rows (core/empty-board board-width num-cleared-rows))
+</code></pre><p>Now we can finally use <a href="https://clojuredocs.org/clojure.core/let">let</a> to combine the different calculation steps into a function:</p><pre><code class="language-clojure">(ns tetrisanalyzer.board.clear-rows
   (:require [tetrisanalyzer.board.core :as core]))
 
 (defn incomplete-row? [row]
@@ -96,13 +96,13 @@
         num-cleared-rows (- height (count remaining-rows))
         empty-rows (core/empty-board width num-cleared-rows)]
     (vec (concat empty-rows remaining-rows))))
-</code></pre><p>I och med att vi redan testat alla deluttryck, är chansen stor att även funktionen fungerar som förväntat:</p><pre><code class="language-clojure">(clear-rows board)  ;; [[0 0 0 0 0 0 0 0 0 0]
+</code></pre><p>Since we&apos;ve already tested all the subexpressions, there&apos;s a good chance that the function will work as expected:</p><pre><code class="language-clojure">(clear-rows board)  ;; [[0 0 0 0 0 0 0 0 0 0]
                     ;;  [0 0 0 0 0 0 0 0 0 0]
                     ;;  [0 0 0 0 0 0 0 0 0 0]
                     ;;  [0 0 0 0 0 0 0 0 0 0]
                     ;;  [1 1 1 1 1 1 0 0 1 1]
                     ;;  [1 0 1 1 1 1 1 1 1 1]]
-</code></pre><p>Och visst, det ser korrekt ut!</p><p>Vi avslutar med att skapa ett test i det nya namespacet <code>clear-rows-test</code>:</p><pre><code class="language-shell">▾ tetris-polylith
+</code></pre><p>And indeed, it looks correct!</p><p>We&apos;ll finish by creating a test in the new namespace <code>clear-rows-test</code>:</p><pre><code class="language-shell">▾ tetris-polylith
   ▸ bases
   ▾ components
     ▸ board
@@ -130,16 +130,16 @@
                           [1 1 1 1 1 1 0 0 1 1]
                           [1 0 1 1 1 1 1 1 1 1]
                           [1 1 1 1 1 1 1 1 1 1]]))))
-</code></pre><p>När vi kör testet visar det grönt och vi kan därmed gå vidare med Python-implementationen. Men först några ord om arbetssättet.</p><h2 id="jobba-snabbare---i-små-steg">Jobba snabbare - i små steg</h2><p>Du kanske lade märke till att vi implementerade koden innan vi skrev testet, och att vi inte skrev hela funktionen i ett enda svep. Istället införde vi ett litet beräkningssteg i taget, som vi först på slutet satte ihop till en hel funktion. Det gjorde att vi kunde justera lösningen vartefter som förståelsen ökade, och att vi inte behövde hålla allt i huvudet. Hjärnan har sina begränsningar och därför är det viktigt att vi hjälper den lite på traven!</p><p>I Clojure kompileras endast det som ändrats, vilket oftast går blixtsnabbt. Det gör att du glömmer bort att det faktiskt är ett kompilerande språk. Du kan öppna vilken fil/namespace som helst i kodbasen, och exekvera en funktion, kanske från ett redan existerande <a href="https://clojuredocs.org/clojure.core/comment">kommentars-block</a>, och omedelbart få tillbaka ett svar. Borta är känslan av att något står emellan dig och koden, i form av väntan på att kompilatorn ska bli nöjd.</p><p>Det är lätt att bli beroende av denna omedelbara återkoppling och känslan ligger väldigt nära i hur det är att jobba med händerna, t.ex. att dreja:</p><figure style="margin: 20px 0;">
+</code></pre><p>When we run the test, it shows green and we can thus move on to the Python implementation. But first, a few words about the workflow.</p><h2 id="work-faster---in-small-steps">Work faster - in small steps</h2><p>You might have noticed that we implemented the code before writing the test, and that we didn&apos;t write the entire function in one go. Instead, we introduced one small calculation step at a time, which we only put together into a complete function at the end. This allowed us to adjust the solution as our understanding grew, and we didn&apos;t need to keep everything in our heads. The brain has its limitations, so it&apos;s important that we help it along a bit!</p><p>In Clojure, only what has changed is compiled, which usually goes lightning fast. This makes you forget that it&apos;s actually a compiled language. You can open any file/namespace in the codebase, and execute a function, perhaps from an existing <a href="https://clojuredocs.org/clojure.core/comment">comment block</a>, and immediately get a response back. Gone is the feeling that something stands between you and the code, in the form of waiting for the compiler to be satisfied.</p><p>It&apos;s easy to become addicted to this immediate feedback, and the feeling is very similar to working with your hands, for example, when throwing pottery:</p><figure style="margin: 20px 0;">
   <img src="assets/06-tetris-playing-ai-the-polylith-way/pottery.png" alt="Pottery" style="width: 50%; max-width: 300px; height: auto; display: block;">
   <figcaption style="font-size: 0.75em; color: #666; margin-top: 4px; text-align: center; max-width: 300px;">Me at the pottery wheel</figcaption>
-</figure><p>Kontakten med leran liknar den du har när du jobbar i en REPL, en omedelbarhet som gör att du snabbt kan testa, justera och jobba mot ett tänkt mål, i realtid.</p><p>Avsaknaden av statiskt typning gör att kompilatorn bara behöver kompilera den lilla ändring som just gjorts och inget annat, vilket är en förutsättning för detta snabba arbetssätt. Kvalitet uppnås genom att testa koden ofta och i små steg, i kombination med traditionell testning och bibliotek som <a href="https://github.com/metosin/malli">malli</a> och <a href="https://clojure.org/guides/spec">spec</a> för att validera data.</p><p>I språk som kräver mer omfattande kompilering, eller saknar en avancerad REPL, är det mycket vanligt att man börjar med att skriva ett test, som ett sätt att driva koden framåt, men också för att trigga en kompilering av koden. I ett språk som Clojure kan du röra dig framåt i ännu mindre steg, på ett snabbt och kontrollerat sätt.</p><p>Nog om detta och låt oss istället växla över till Python!</p><h3 id="python">Python</h3><p>Vi börjar med att försöka få till en så bra utvecklarupplevelse som möjligt, liknande den vi har i Clojure. Det finns många bra IDE:er, men här kommer jag att använda <a href="https://www.jetbrains.com/pycharm/">PyCharm</a>.</p><ul><li><a href="https://www.jetbrains.com/pycharm/download">Installera</a> PyCharm om du inte redan har gjort det.</li><li><a href="https://ipython.org/install/">Installera</a> IPython, förslagsvis globalt.<ul><li>IPython är ett alternativ till standard-<a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a>n i Python.</li></ul></li><li>Konfigurera IPythons <a href="https://ipython.readthedocs.io/en/stable/config/intro.html">config fil</a>, och lägg till:<pre><code class="language-shell">c.InteractiveShellApp.exec_lines = [&quot;%autoreload 2&quot;]
+</figure><p>The contact with the clay resembles what you have when working in a REPL, an immediacy that lets you quickly test, adjust, and work toward an intended goal, in real time.</p><p>The absence of static typing means the compiler only needs to compile the small change that was just made and nothing else, which is a prerequisite for this fast workflow. Quality is achieved by testing the code often and in small steps, in combination with traditional testing and libraries like <a href="https://github.com/metosin/malli">malli</a> and <a href="https://clojure.org/guides/spec">spec</a> to validate the data.</p><p>In languages that require more extensive compilation, or lack an advanced REPL, it&apos;s very common to start by writing a test, both as a way to drive the code forward and to trigger a compilation of the code. In a language like Clojure, you can move forward in even smaller steps, in a fast and controlled way.</p><p>Enough about this, and let&apos;s switch over to Python instead!</p><h3 id="python">Python</h3><p>We&apos;ll start by trying to get as good a developer experience as possible, similar to what we have in Clojure. There are many good IDEs, but here I&apos;ll be using <a href="https://www.jetbrains.com/pycharm/">PyCharm</a>.</p><ul><li><a href="https://www.jetbrains.com/pycharm/download">Install</a> PyCharm if you haven&apos;t already.</li><li><a href="https://ipython.org/install/">Install</a> IPython, preferably globally.<ul><li>IPython is an alternative to the standard <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a> in Python.</li></ul></li><li>Configure IPython&apos;s <a href="https://ipython.readthedocs.io/en/stable/config/intro.html">config file</a>, and add:<pre><code class="language-shell">c.InteractiveShellApp.exec_lines = [&quot;%autoreload 2&quot;]
 c.InteractiveShellApp.extensions = [&quot;autoreload&quot;]
 c.TerminalInteractiveShell.confirm_exit = False
-</code></pre><ul><li>Config filen hittas troligen här: <code>~/.ipython/profile_default/ipython_config.py</code></li></ul></li><li>Starta PyCharm och gå till <code>PyCharm &gt; Settings &gt; Python &gt; Console &gt; Python Console &gt; Starting script</code> och lägg till:<pre><code class="language-shell">%load_ext autoreload
+</code></pre><ul><li>The config file is probably found here: <code>~/.ipython/profile_default/ipython_config.py</code></li></ul></li><li>Start PyCharm and go to <code>PyCharm &gt; Settings &gt; Python &gt; Console &gt; Python Console &gt; Starting script</code> and add:<pre><code class="language-shell">%load_ext autoreload
 %autoreload 2
 %aimport -pydev_umd
-</code></pre><ul><li><code>%load_ext autoreload</code> laddar IPython-extensionen <a href="https://ipython.org/ipython-doc/3/config/extensions/autoreload.html">autoreload</a>, vilket gör att moduler kan laddas om automatiskt när filer ändras.</li><li><code>%autoreload 2</code> aktiverar automatisk omladdning av alla moduler (utom de som är undantagna)</li><li><code>%aimport -pydev_umd</code> exkluderar <code>pydev_umd</code> från omladdning, för att få bort fel som annars visas i REPLn.</li><li>Det kan förekomma små rödmarkeringar i konfigurationen, men dessa är inga riktiga fel och kan ignoreras.</li></ul></li><li>Välj <code>View &gt; Tool Windows &gt; Python Console</code> från menyn, som öppnar en `Python Console&apos;-panel i nedre delen av IDEn.<ul><li>En prompt <code>In [1]</code> ska nu visas istället för <code>&gt;&gt;&gt;</code>, vilket indikerar att det är IPython REPLn som kör, och inte standard-REPLn.</li></ul></li><li>Därefter sätter jag upp mina snabbtangentkommandon under <code>Pycharm &gt; Settings... &gt; Keymap &gt; Plugins &gt; Python Community Editor</code> för att kunna skicka kod till REPLn på samma sätt som jag är van vid i Clojure.</li><li>Jag har även lagt till <code>ipython&gt;=8.0.0</code> till <code>pyproject.toml</code>, och kört <code>uv sync --dev</code> för att ladda biblioteket.</li></ul><p>Mycket av det som står här kommer från <a href="https://davidvujic.blogspot.com/2022/08/joyful-python-with-repl.html#easy-setup">denna</a> bloggpost under rubriken &quot;Easy setup&quot; (tack David Vujic!).</p><p>Nu är det hög tid att skriva lite Python-kod, och vi börjar med att skapa modulen <code>clear_rows.py</code>:</p><pre><code class="language-shell">  ▾ components
+</code></pre><ul><li><code>%load_ext autoreload</code> loads the IPython extension <a href="https://ipython.org/ipython-doc/3/config/extensions/autoreload.html">autoreload</a>, which allows modules to be reloaded automatically when files change.</li><li><code>%autoreload 2</code> enables automatic reloading of all modules (except those that are excluded)</li><li><code>%aimport -pydev_umd</code> excludes <code>pydev_umd</code> from reloading, to remove errors that would otherwise be shown in the REPL.</li><li>There may be small red markings in the configuration, but these are not real errors and can be ignored.</li></ul></li><li>Select <code>View &gt; Tool Windows &gt; Python Console</code> from the menu, which opens a <code>Python Console</code> panel in the lower part of the IDE.<ul><li>A prompt <code>In [1]</code> should now appear instead of <code>&gt;&gt;&gt;</code>, which indicates that it&apos;s the IPython REPL running, and not the standard REPL.</li></ul></li><li>Then I set up my keyboard shortcuts under <code>Pycharm &gt; Settings... &gt; Keymap &gt; Plugins &gt; Python Community Editor</code> to be able to send code to the REPL in the same way I&apos;m used to in Clojure.</li><li>I&apos;ve also added <code>ipython&gt;=8.0.0</code> to <a href="https://github.com/tengstrand/tetrisanalyzer/blob/22af4864215aab356b5799d718a287d1c18841f3/langs/python/tetris-polylith-uv/pyproject.toml#L15">pyproject.toml</a>, and ran <code>uv sync --dev</code> to load the library.</li></ul><p>Much of what&apos;s written here comes from <a href="https://davidvujic.blogspot.com/2022/08/joyful-python-with-repl.html#easy-setup">this</a> blog post under the heading &quot;Easy setup&quot; (thanks David Vujic!).</p><p>Now it&apos;s high time to write some Python code, and we&apos;ll start by creating the module <code>clear_rows.py</code>:</p><pre><code class="language-shell">  ▾ components
     ▾ tetrisanalyzer
       ▾ board
         __init__.py
@@ -147,20 +147,20 @@ c.TerminalInteractiveShell.confirm_exit = False
         copy.py
       ▸ piece
   ▸ test
-</code></pre><p>Därefter lägger vi till raden:</p><pre><code class="language-python">row = [1, 1, 1, 0, 1, 1, 1, 0, 1, 1]
-</code></pre><p>Varefter vi kör snabbkommandot för att skicka hela modulen till REPLn, så att den läses in (output från REPLn):</p><pre><code class="language-python">In [1]: runfile(&apos;/Users/tengstrand/source/tetrisanalyzer/langs/python/tetris-polylith-uv/components/tetrisanalyzer/board/clear_rows.py&apos;, wdir=&apos;/Users/tengstrand/source/tetrisanalyzer/langs/python/tetris-polylith-uv/components/tetrisanalyzer/board&apos;)
-</code></pre><p>Nu kan vi markera <code>row</code> i editorn och skicka den till REPLn:</p><pre><code class="language-python">In [2]: row
+</code></pre><p>Then we add the row:</p><pre><code class="language-python">row = [1, 1, 1, 0, 1, 1, 1, 0, 1, 1]
+</code></pre><p>After which we run the shortcut command to send the entire module to the REPL, so it gets loaded (output from the REPL):</p><pre><code class="language-python">In [1]: runfile(&apos;/Users/tengstrand/source/tetrisanalyzer/langs/python/tetris-polylith-uv/components/tetrisanalyzer/board/clear_rows.py&apos;, wdir=&apos;/Users/tengstrand/source/tetrisanalyzer/langs/python/tetris-polylith-uv/components/tetrisanalyzer/board&apos;)
+</code></pre><p>Now we can select <code>row</code> in the editor and send it to the REPL:</p><pre><code class="language-python">In [2]: row
 Out[2]: [1, 1, 1, 0, 1, 1, 1, 0, 1, 1]
-</code></pre><p>Genom REPLn har vi nu ett smidigt sätt att interagera med den kompilerade koden även i Python!</p><p>Låt oss översätta följande rad från Clojure till Python:</p><pre><code class="language-clojure">(some zero? row)
-</code></pre><p>Genom att lägga följande rad till <code>clear_rows.py</code>:</p><pre><code class="language-python">0 in row
-</code></pre><p>Nu kan vi markera raden och skickar den till REPLn, vilket är ett alternativ till att ladda hela modulen:</p><pre><code class="language-python">In [3]: 0 in row
+</code></pre><p>Through the REPL, we now have a convenient way to interact with the compiled code even in Python!</p><p>Let&apos;s translate the following line from Clojure to Python:</p><pre><code class="language-clojure">(some zero? row)
+</code></pre><p>By adding the following line to <code>clear_rows.py</code>:</p><pre><code class="language-python">0 in row
+</code></pre><p>Now we can select the line and send it to the REPL, which is an alternative to loading the entire module:</p><pre><code class="language-python">In [3]: 0 in row
 Out[3]: True
-</code></pre><p>Därefter ändrar vi <code>row</code> och testar igen:</p><pre><code class="language-python">row = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+</code></pre><p>Then we change <code>row</code> and test again:</p><pre><code class="language-python">row = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
 0 in row
 </code></pre><pre><code class="language-python">In [4]: 0 in row
 Out[4]: False
-</code></pre><p>Det verkar fungera! Dags att skapa en funktion av koden, och testköra den:</p><pre><code class="language-python">def is_incomplete(row):
+</code></pre><p>It seems to work! Time to create a function from the code, and test run it:</p><pre><code class="language-python">def is_incomplete(row):
     return 0 in row
 
 row = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
@@ -168,12 +168,12 @@ row = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 is_incomplete(row)
 </code></pre><pre><code class="language-python">In [5]: is_incomplete(row)
 Out[5]: False
-</code></pre><p>Därefter uppdaterar jag <code>row</code> och testar igen:</p><pre><code class="language-python">row = [1, 1, 1, 0, 1, 1, 1, 1, 1, 1]
+</code></pre><p>Then I update <code>row</code> and test again:</p><pre><code class="language-python">row = [1, 1, 1, 0, 1, 1, 1, 1, 1, 1]
 
 is_incomplete(row)
 </code></pre><pre><code class="language-python">In [6]: is_incomplete(row)
 Out[6]: True
-</code></pre><p>Det ser ut att fungera!</p><p>Nu lägger vi till en <code>board</code> till modulen, så att vi har något att testa mot:</p><pre><code class="language-python">def is_incomplete(row):
+</code></pre><p>It looks like it works!</p><p>Now we&apos;ll add a <code>board</code> to the module, so we have something to test against:</p><pre><code class="language-python">def is_incomplete(row):
     return 0 in row
 
 
@@ -183,21 +183,21 @@ board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [1, 1, 1, 1, 1, 1, 0, 0, 1, 1],
          [1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
          [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
-</code></pre><p>I clojure kan vi filtrera fram icke kompletta rader så här:</p><pre><code class="language-clojure">(filter incomplete-row? board)
-</code></pre><p>Detta skrivs enklast så här i Python:</p><pre><code class="language-python">[row for row in board if is_incomplete(row)]
-</code></pre><p>The statement is a <a href="https://www.geeksforgeeks.org/python/python-list-comprehension/">list comprehension</a> that creates a new list by iterating over <code>board</code> and keeping only rows where <code>is_incomplete</code> returns <code>True</code>.</p><p>Låt oss testköra uttrycket:</p><pre><code class="language-python">In [7]: [row for row in board if is_incomplete(row)]
+</code></pre><p>In Clojure we can filter out incomplete rows like this:</p><pre><code class="language-clojure">(filter incomplete-row? board)
+</code></pre><p>This is written most simply like this in Python:</p><pre><code class="language-python">[row for row in board if is_incomplete(row)]
+</code></pre><p>The statement is a <a href="https://www.geeksforgeeks.org/python/python-list-comprehension/">list comprehension</a> that creates a new list by iterating over <code>board</code> and keeping only rows where <code>is_incomplete</code> returns <code>True</code>.</p><p>Let&apos;s test run the expression:</p><pre><code class="language-python">In [7]: [row for row in board if is_incomplete(row)]
 Out[7]: 
 [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [1, 1, 1, 1, 1, 1, 0, 0, 1, 1],
  [1, 0, 1, 1, 1, 1, 1, 1, 1, 1]]
-</code></pre><p>Före <code>for</code> har vi <code>row</code> vilket är vad vi itererar över:</p><pre><code class="language-python">[row for row in board if is_incomplete(row)]
-</code></pre><p>Python tillåter oss även att göra en beräkning för varje <code>row</code>, vilket kan exemplifieras med:</p><pre><code class="language-python">[row + [9] for row in board if is_incomplete(row)]
-</code></pre><p>Som lägger till <code>9</code> i slutet av varje rad:</p><pre><code class="language-python">[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
+</code></pre><p>It works!</p><p>Before <code>for</code> we have <code>row</code>, which is what we iterate over:</p><pre><code class="language-python">[row for row in board if is_incomplete(row)]
+</code></pre><p>Python also allows us to do a calculation for each <code>row</code>, which can be exemplified with:</p><pre><code class="language-python">[row + [9] for row in board if is_incomplete(row)]
+</code></pre><p>Which adds <code>9</code> to the end of each row:</p><pre><code class="language-python">[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
  [1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 9],
  [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 9]]
-</code></pre><p>Låt oss återgå till ursprungsversionen och tilldela den till <code>remaining_rows</code>:</p><pre><code class="language-python">def is_incomplete(row):
+</code></pre><p>Let&apos;s return to the original version and assign it to <code>remaining_rows</code>:</p><pre><code class="language-python">def is_incomplete(row):
     return 0 in row
 
 board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -208,13 +208,13 @@ board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]
 
 remaining_rows = [row for row in board if is_incomplete(row)]
-</code></pre><p>Innan vi går vidare, låt oss göra samma refaktorering av <code>empty_row</code> i <code>core.py</code> som vi gjorde i Clojure:</p><pre><code class="language-python">def empty_row(width):
+</code></pre><p>Before we continue, let&apos;s do the same refactoring of <code>empty_row</code> in <code>core.py</code> as we did in Clojure:</p><pre><code class="language-python">def empty_row(width):
     return [0] * width
 
 
 def empty_board(width, height):
     return [empty_row(width) for _ in range(height)]
-</code></pre><p>Vi fortsätter med att översätta denna Clojure-kod:</p><pre><code class="language-clojure">(def width (count (first board)))
+</code></pre><p>We continue by translating this Clojure code:</p><pre><code class="language-clojure">(def width (count (first board)))
 (def height (count board))
 (def remaining-rows (filter incomplete-row? board))
 (def num-cleared-rows (- height (count remaining-rows))) ;; 2
@@ -235,11 +235,11 @@ empty_rows + remaining_rows # [[0,0,0,0,0,0,0,0,0,0],
                             #  [0,0,0,0,0,0,0,0,0,0],
                             #  [1,1,1,1,1,1,0,0,1,1],
                             #  [1,0,1,1,1,1,1,1,1,1]]
-</code></pre><p>Jag har medvetet kopierat den funktionella stilen från Clojure till Python, och som ni ser fungerar det utmärkt även i Python, men med en brasklapp.</p><h3 id="mutability">Mutability</h3><p>Vid ett tillfälle såg en del av Clojure-koden ut så här:</p><pre><code class="language-clojure">(def empty-row (vec (repeat board-width 0)))
+</code></pre><p>I&apos;ve deliberately copied the functional style from Clojure to Python, and as you can see it works excellently in Python too, but with a caveat.</p><h3 id="mutability">Mutability</h3><p>At one point, part of the Clojure code looked like this:</p><pre><code class="language-clojure">(def empty-row (vec (repeat board-width 0)))
 (def empty-rows (repeat num-cleared-rows empty-row)])
-</code></pre><p>Vilket jag översatte till:</p><pre><code class="language-python">empty_row = [0 for _ in range(board_width)]
+</code></pre><p>Which I translated to:</p><pre><code class="language-python">empty_row = [0 for _ in range(board_width)]
 empty_rows = [empty_row for _ in range(num_cleared_rows)]
-</code></pre><p>Problemet med Python-koden är att <code>empty_rows</code> refererar till en och samma <code>empty_row</code> och om den sistnämda ändras, så ändras alla rader i <code>empty_rows</code>, vilket blir ett problem om <code>num_cleared_rows</code> är större än ett.</p><p>I den nya lösningen skapar vi i stället helt nya rader i Python, medan vi i Clojure kan dela på samma rad då den är immutable. Att allt är immutable i Clojure är en stor fördel när vi låter datat flöda genom systemet, då det hindrar datat från att sprida sig okontrollerat till andra delar längre ner i flödet.</p><h3 id="sätta-ihop">Sätta ihop</h3><p>Låt oss sätta ihop allting till en funktion:</p><pre><code class="language-python">from tetrisanalyzer.board.core import empty_board
+</code></pre><p>The problem with the Python code is that <code>empty_rows</code> refers to one and the same <code>empty_row</code>, and if the latter is changed, all rows in <code>empty_rows</code> change, which becomes a problem if <code>num_cleared_rows</code> is greater than one.</p><p>In the new solution, we instead create completely new rows in Python, while in Clojure we can share the same row since it&apos;s immutable. The fact that everything is immutable in Clojure is a big advantage when we let data flow through the system, as it prevents data from spreading uncontrollably to other parts further down in the data flow.</p><h3 id="putting-it-together">Putting it together</h3><p>Let&apos;s put everything together into a function:</p><pre><code class="language-python">from tetrisanalyzer.board.core import empty_board
 
 
 def is_incomplete(row):
@@ -247,13 +247,13 @@ def is_incomplete(row):
 
 
 def clear_rows(board):
-    board_width = len(board[0])
-    board_height = len(board)
+    width = len(board[0])
+    height = len(board)
     remaining_rows = [row for row in board if is_incomplete(row)]
-    num_cleared_rows = board_height - len(remaining_rows)
-    empty_rows = empty_rows = empty_board(width, num_cleared_rows)
+    num_cleared_rows = height - len(remaining_rows)
+    empty_rows = empty_board(width, num_cleared_rows)
     return empty_rows + remaining_rows
-</code></pre><p>Nu kan vi provköra den. Notera att vi tagit bort <code>board</code> från källkodsfilen, men att REPLn minns den från tidigare, så att den kan användas vid anropet:</p><pre><code class="language-python">clear_rows(board)
+</code></pre><p>Now we can test run it. Note that we&apos;ve removed <code>board</code> from the source file, but the REPL still remembers it from earlier:</p><pre><code class="language-python">clear_rows(board)
 </code></pre><pre><code class="language-python">In [8]: clear_rows(board)
 Out[8]: 
 [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -262,12 +262,12 @@ Out[8]:
  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
  [1, 1, 1, 1, 1, 1, 0, 0, 1, 1],
  [1, 0, 1, 1, 1, 1, 1, 1, 1, 1]]
-</code></pre><p>Det ser korrekt ut!</p><p>Innan vi testar, behöver vi exponera funktionen <code>clear_rows</code> i <code>board</code>-interfacet, genom att uppdatera <code>components/tetrisanalyzer/board/__init__.py</code> (och skicka modulen till REPLn):</p><pre><code class="language-python">from tetrisanalyzer.board.clear_rows import clear_rows
+</code></pre><p>It looks correct!</p><p>Before we add a test, we need to expose the <code>clear_rows</code> function in the <code>board</code> interface, by updating <code>components/tetrisanalyzer/board/__init__.py</code> (and sending the module to the REPL):</p><pre><code class="language-python">from tetrisanalyzer.board.clear_rows import clear_rows
 from tetrisanalyzer.board.core import empty_board, set_cell, set_piece
 
 
 __all__ = [&quot;empty_board&quot;, &quot;set_cell&quot;, &quot;set_piece&quot;, &quot;clear_rows&quot;]
-</code></pre><p>Slutligen lägger vi till testet <code>test_clear_rows.py</code> till <code>board</code>-komponenten:</p><pre><code class="language-shell">  ▾ components
+</code></pre><p>Finally, we&apos;ll add the test <code>test_clear_rows.py</code> to the <code>board</code> component:</p><pre><code class="language-shell">  ▾ components
     ▾ tetrisanalyzer
       ▸ board
       ▸ piece
@@ -297,8 +297,8 @@ def test_clear_rows():
                 [1, 1, 1, 1, 1, 1, 0, 0, 1, 1],
                 [1, 0, 1, 1, 1, 1, 1, 1, 1, 1]]
     
-    assert expected == board.clear_rows(input_board)
-</code></pre><p>Nu kan vi köra alla tester med <code>uv sync --dev</code>:</p><pre><code class="language-shell">============================================ test session starts ============================================
+    assert expected == board.clear_rows(input)
+</code></pre><p>Now we can run all tests with <code>uv run pytest</code>:</p><pre><code class="language-shell">============================================ test session starts ============================================
 platform darwin -- Python 3.13.11, pytest-9.0.2, pluggy-1.6.0
 rootdir: /Users/tengstrand/source/tetrisanalyzer/langs/python/tetris-polylith-uv
 configfile: pyproject.toml
@@ -308,7 +308,7 @@ test/components/tetrisanalyzer/board/test_clear_rows.py .                       
 test/components/tetrisanalyzer/board/test_core.py ..                                                  [100%]
 
 ============================================= 3 passed in 0.01s =============================================
-</code></pre><p>Det fungerar!</p><h3 id="sammanfattning">Sammanfattning</h3><p>Jag har medvetet hållit Python-koden funktionell, dels för att lättare kunna jämföra med Clojure, men också för att jag gillar enkelheten med funktionell programmering. Vi lärde oss också att vi behövde hålla tungan rätt i mun när vi jobbar med mutable data!</p><p>Det viktigaste budskapet är dock att det går att jobba snabbare och i mindre steg, när vi tar os mot tänkta mål!</p><p>Happy Coding!</p></div>]]></content>
+</code></pre><p>It works!</p><h3 id="summary">Summary</h3><p>I&apos;ve deliberately kept the Python code functional, partly to make it easier to compare with Clojure, but also because I like the simplicity of functional programming. We also learned that we needed to be careful when working with mutable data!</p><p>The key takeaway: working in smaller steps helps us move faster!</p><p>Happy Coding!</p></div>]]></content>
   </entry>
   <entry>
     <id>https://tengstrand.github.io/blog/05-tetris-playing-ai-the-polylith-way-1.html</id>
