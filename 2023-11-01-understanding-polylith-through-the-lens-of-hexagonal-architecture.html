@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Understanding Polylith through the lens of Hexagonal Architecture</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link type="application/atom+xml" rel="alternate" href="atom.xml" title="Understanding Polylith through the lens of Hexagonal Architecture">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+      /* Prevent jump by setting padding-top immediately */
+      body { padding-top: 50px !important; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-clojure.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-python.min.js"></script>
+    <script type="text/javascript" src="https://livejs.com/live.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism.min.css">
+
+
+
+    <!-- Social sharing (Facebook, Twitter, LinkedIn, etc.) -->
+    <meta name="title" content="Understanding Polylith through the lens of Hexagonal Architecture">
+    <meta name="twitter:title" content="Understanding Polylith through the lens of Hexagonal Architecture">
+    <meta property="og:title" content="Understanding Polylith through the lens of Hexagonal Architecture">
+    <meta property="og:type" content="website">
+
+
+    <meta name="twitter:url" content="https://tengstrand.github.io/blog/2023-11-01-understanding-polylith-through-the-lens-of-hexagonal-architecture.html">
+    <meta property="og:url" content="https://tengstrand.github.io/blog/2023-11-01-understanding-polylith-through-the-lens-of-hexagonal-architecture.html">
+
+
+    <meta name="twitter:image" content="https://tengstrand.github.io/blog/assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/glasses.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:image" content="https://tengstrand.github.io/blog/assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/glasses.webp">
+    <meta property="og:image:alt" content="">
+
+
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M04G8Y5PWB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-M04G8Y5PWB');
+    </script>
+  </head>
+  <body>
+
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="index.html">Home</a>
+          <a class="page-link" href="archive.html">Archive</a>
+          <a class="page-link" href="tags/index.html">Tags</a>
+          
+	  <a class="page-link" href="atom.xml">
+            Feed
+          </a>
+          
+          
+        </div>
+        <div class="site-header-content">
+          <a href="index.html" style="text-decoration: none;">
+            <img src="assets/summer.jpeg" alt="Summer" class="site-header-image">
+          </a>
+          <div class="site-header-text">
+            <h1 class="site-title">
+              <a class="page-link" href="index.html">Tengstrand&#39;s Blog</a>
+            </h1>
+            <p>The search for simpler code while having fun.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+
+      <h1>
+  
+  Understanding Polylith through the lens of Hexagonal Architecture
+  
+</h1>
+<div><blockquote><p>In the Hexagonal architecture, we start with the application core, and let that grow over time. Polylith starts at another end, with the bricks, where each brick does one thing, and if we want to do one more thing, then we create another brick.</p></blockquote><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/glasses.webp" alt="Understanding Polylith through the lens of Hexagonal Architecture" style="width: 550px; max-width: 100%; display: block; margin: 15px 0;" /><p>If you are a fan of the <a href="https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)">Hexagonal</a> architecture, also known as Ports &amp; Adapters, we think you’ll love the way <a href="https://polylith.gitbook.io/polylith">Polylith</a> turns your system into fine-grained Lego-like bricks!</p><!-- end-of-preview --><p>The Hexagonal architecture was invented in 2005 by <a href="https://en.wikipedia.org/wiki/Alistair_Cockburn">Alistair Cockburn</a>. His <a href="https://alistair.cockburn.us/hexagonal-architecture/">article</a> states that it “Allows an application to equally be driven by users, programs, automated test or batch scripts, and to be developed and tested in isolation from its eventual run-time devices and databases”.</p><p>The solution consists of three types of building blocks; <em>ports</em>, <em>adapters</em>, and the <em>application core</em>:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/hexagonal-architecture.webp" alt="Hexagonal Architecture" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>The picture shows a user that interacts with a user interface that talks to a Hexagonal backend application. There is also another system that interacts directly with the same application.</p><p>The main idea in the Hexagonal architecture is to isolate the core from the outside world:</p><ol><li>The primary adapters (1) receive calls from different systems, and serve as a bridge between the application core (3) and the outside world.</li><li>The incoming ports (2) abstract away implementation details in the application core (3) and only expose what each adapter (1) needs to know.</li><li>The application core (3) consists of business domain logic for an application, and only knows about itself and outgoing ports (4).</li><li>The outgoing ports (4) expose functionality that is not part of the business logic (3), and abstract away implementation details in the secondary adapters (5).</li><li>The secondary adapters (5) implement the outgoing ports (4), typically IO operations such as interactions with databases, message queues, the file system, and third-party APIs.</li></ol><p>Let&apos;s extract a slice, so we can more easily reason about these building blocks:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/hexagonal-slice1.webp" alt="Hexagonal Architecture Slice" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>This shows how a user, via a user interface (UI), talks to a REST service that communicates with a database.</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/hexagonal-slice2.webp" alt="Hexagonal Architecture Slice" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>Here, a user uses a command line tool, which accesses a database and a file system from a shell.</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/hexagonal-slice2.webp" alt="Hexagonal Architecture Slice" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>The architecture leaves some flexibility when it comes to how the ports can be organized. Here we have switched the number of incoming and outgoing ports.</p><p>The Hexagonal architecture makes the application core depend less on its surroundings, which makes it easier to test and e.g. use an in-memory database when testing the app with a script.</p><p>Alistair Cockburn doesn’t talk much about how to handle larger systems in his <a href="https://alistair.cockburn.us/hexagonal-architecture/">article</a>, but there is a “Distributed, Large-Team Development” section that mentions that a system can be split into several applications.</p><p><a href="https://en.wikipedia.org/wiki/Hexagonal_architecture_(software)">Wikipedia</a> says that “According to some authors, the hexagonal architecture is at the origin of the <a href="https://en.wikipedia.org/wiki/Microservices">microservices architecture</a>”.</p><p>Here is how it may look like:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/micro-services.webp" alt="Microservices Architecture" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>If too many charts make your eyes hurt, hold on, further down there will be references to code examples.</p><p>Now it’s high time to look at how the Polylith architecture works!</p><h4 id="the-polylith-way">The Polylith way</h4><p>Polylith is a component based architecture that uses small LEGO®-like bricks that can be combined into various services and tools.</p><p>Working with a Polylith system is like having a Lego box with bricks:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/lego-box.webp" alt="Lego Box" style="width: 300px; max-width: 100%; display: block; margin: 30px 0;" /><p>In the Lego box we find two categories of <code>bricks</code>. The <code>components</code> in green, and the <code>bases</code> in blue. More on these categories later.</p><p>The bricks can be combined into any set of services and tools, called <code>projects</code> in Polylith:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/projects.webp" alt="Projects" style="width: 400px; max-width: 100%; display: block; margin: 30px 0;" /><p>We also have a special project called <code>development</code> which contains all bricks, and is used when working with the code:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/development.webp" alt="Development" style="width: 160px; max-width: 100%; display: block; margin: 30px 0;" /><p>All bricks and projects live together in a <a href="https://en.wikipedia.org/wiki/Monorepo">monorepo</a>:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/monorepo.webp" alt="Monorepo" style="width: 360px; max-width: 100%; display: block; margin: 30px 0;" /><p>Here we illustrate how bricks are used across projects:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/usage-across-services.webp" alt="Usage across monorepos" style="width: 360px; max-width: 100%; display: block; margin: 30px 0;" /><p>For example, the <code>db</code> component is used in both <code>backend</code> and <code>email-lambda</code>. This helps us remove code duplication and gives a tremendous level of reuse across the entire codebase.</p><h3 id="development">Development</h3><p>The <code>development</code> project gives us a monolithic development experience so we can easily search, test, refactor, and debug the code, even across services.</p><p>You may wonder what a single development project has to do with an architecture. There are three main reasons:</p><p>Firstly, it guarantees that all bricks fit together, so that they can be combined in any way into projects, and then be built into artifacts. Bricks have access to all other component interfaces, which make them easy to create.</p><p>Secondly, how the code is executed in production is an implementation detail in Polylith. The philosophy is that we should be able to change how to run the code in production without affecting the development experience, and vice versa.</p><p>Thirdly, the single development experience is there to speed up the feedback loop and to make us more productive. Having all the code in one place gives us a simpler development setup compared to having several services running locally. It also improves the testing experience, including potential support for incremental testing.</p><h3 id="project">Project</h3><p>A project is used to assemble a set of bricks into one place, so that we can build different kinds of artifacts from them, e.g. services and tools.</p><p>A command line tool can look something like this in Polylith:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/cli-tool-slice1.webp" alt="CLI Tool" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>We define a project in Polylith by listing the included bricks by name in a configuration file, similar to how libraries are handled but without giving a version.</p><p>This makes us stop thinking of code as layers or other shapes. Instead we can concentrate on one brick at a time, without caring about dependencies or how things are executed in production.</p><p>If we follow the call chain from the shell to the file system, it could look something like this:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/cli-tool-slice2.webp" alt="CLI Tool Slice" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>The blue brick receives a call from the shell that delegates to a number of bricks, ending with the file brick that touches the <code>file</code> system.</p><h3 id="a-comparison">A comparison</h3><p>To better understand the difference between <a href="https://polylith.gitbook.io/polylith/">Polylith</a> and the <a href="https://alistair.cockburn.us/hexagonal-architecture">Hexagonal architecture</a>, let&apos;s compare the two:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/hexagon-simplified.webp" alt="Hexagon Simplified" style="width: 360px; max-width: 100%; display: block; margin: 30px 0;" /><h3 id="component">Component</h3><p>Components in Polylith are our composable building blocks:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/component.webp" alt="Component" style="width: 200px; max-width: 100%; display: block; margin: 30px 0;" /><p>A component (c) has an interface (i) that delegates incoming calls to its implementation (x). We often skip showing the interface and instead illustrate the component as a green box (c).</p><p>The interface (i) sometimes has the same role as a primary port (2):</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/component-primary-port.webp" alt="Component Primary Port" style="width: 270px; max-width: 100%; display: block; margin: 30px 0;" /><p>In that case, the component implementation (x) corresponds to a subset (3) of an application core (6).</p><p>The interface (i) can also have the role of outgoing port (4):</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/component-outgoing-port.webp" alt="Component Outgoing Port" style="width: 280px; max-width: 100%; display: block; margin: 30px 0;" /><p>In that case, the implementation (x) corresponds to the secondary adapter (5).</p><p>Components only know about interfaces (i).</p><h3 id="base">Base</h3><p>A base is a bridge between the outside world and the components it delegates to (via interfaces):</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/base.webp" alt="Base" style="width: 280px; max-width: 100%; display: block; margin: 30px 0;" /><p>A base (b) has a public API (a) that receives incoming calls from the outside world (w), and delegates (d) them to interfaces (i) and in rare cases other bases (b). We often skip showing the different parts of the base (a + d) and instead illustrate it as a blue box (b):</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/base-equals-primary-adapter.webp" alt="Base equals Primary Adapter" style="width: 230px; max-width: 100%; display: block; margin: 30px 0;" /><p>A base (b) has the same role as the primary adapter (1) which is to expose a public API.</p><p>Bases only know about other bases and interfaces (i).</p><h3 id="brick">Brick</h3><p>Brick is the common name for a component or base:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/brick.webp" alt="Brick" style="width: 135px; max-width: 100%; display: block; margin: 30px 0;" /><p>The name comes from the fact that they are small and composable, like LEGO® bricks.</p><p>A way of thinking about bricks is that they are Hexagon application cores in miniature:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/brick-application-core.webp" alt="Brick Application Core" style="width: 210px; max-width: 100%; display: block; margin: 30px 0;" /><p>This component accesses three different interfaces. The component doesn’t know how the interfaces are implemented, in the same way an application core doesn’t know which secondary adapters are behind the outgoing ports.</p><p>One difference is that behind the interfaces to the right, there can be both “secondary adapters” and pure domain logic.</p><p>To better understand the differences, you can see a Polylith project as made up by many &quot;mini application cores&quot;, which could look something like this:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/project-as-application-cores.webp" alt="Project as Application Cores" style="width: 400px; max-width: 100%; display: block; margin: 30px 0;" /><p>The &quot;mini core&quot; to the left is represented by a base in Polylith. The five domain “mini cores” in the middle will be components, and then we have two more “mini cores” to the right that encapsulate different IO-operations, which also will turn into components.</p><p>The eight &quot;mini cores&quot; are assembled into an application in Polylith:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/mini-cores.webp" alt="Mini Cores" style="width: 160px; max-width: 100%; display: block; margin: 30px 0;" /><p>Applications are called <code>projects</code> in Polylith, and are illustrated like this:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/project.webp" alt="Project" style="width: 150px; max-width: 100%; display: block; margin: 30px 0;" /><p>Polylith doesn&apos;t force you to organize your bricks in a certain way, but because it’s so easy to create small, cohesive components, a Polylith system tends to end up with many components, each of which does <a href="https://en.wikipedia.org/wiki/Single-responsibility_principle">one thing</a>.</p><p>That can be a subdomain, an interface to a database, or a third-party API.</p><h3 id="the-application-core">The Application core</h3><p>Let&apos;s see what an application core could look like in Polylith:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/application-core-in-polylith.webp" alt="Application Core in Polylith" style="width: 550px; max-width: 100%; display: block; margin: 30px 0;" /><p>Here is an example of how a primary adapter (1) delegates to an incoming port (2) that delegates to a subdomain (3) that calls three other parts of the application domain (6) and two outgoing ports (4).</p><p>In Polylith, the base (1) does the same job as the primary adapter. The four subdomains and the two secondary ports with associated secondary adapters, are replaced by six components in this example.</p><p>If we strip away the calls, the two applications can be illustrated like this:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/application-core-in-polylith-simplified.webp" alt="Application Core in Polylith Simplified" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>In the Hexagonal architecture, we start with the application core, and let that grow over time, and maybe split it up into smaller pieces when it gets too big. Alistair’s <a href="https://alistair.cockburn.us/hexagonal-architecture/">article</a> has examples on how to isolate the application core, but leaves no guidance on how to structure the code inside the core.</p><p>Polylith starts at another end, with the bricks. A brick does one thing, and if we want to do one more thing, then we create another brick. We don’t have one or more “application bricks” that we continuously add code to. Instead we end up with a set of bricks that can be put together into various projects.</p><p>Exactly how the code should be executed in production can be postponed to later, and also be easily changed when needed, by regrouping the bricks.</p><h3 id="composability">Composability</h3><p>In object oriented languages, functionality is oriented around objects, but often with one exception: arithmetic operations.</p><p>Back in time when most object oriented languages didn&apos;t have good support for functional style programming, you could still use arithmetic expressions like <code>1 + 2 * 3</code>:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/arithmetic-expression.webp" alt="Arithmetic Expression" style="width: 250px; max-width: 100%; display: block; margin: 30px 0;" /><p>Compare this with an all-in object oriented approach. Note that this is just an example to illustrate the differences, not the optimal way of solving the problem:</p><pre><code>Number one = new Number(1);
+Number two = new Number(2);
+Number three = new Number(3);
+Number result = one.plus(two.times(three));
+</code></pre><p>As you can see, this requires more code and doesn&apos;t read as well.</p><p>Let’s list the different ways an object A can gain access to an objects B:</p><ul><li>Pass in B as an argument when calling a method of A.</li><li>Pass in B in the constructor of A and save it as a member of A.</li><li>Pass in B to a setter method of A and save it as a member of A.</li><li>Use reflection to set a member B in A.</li></ul><p>Any of these variants will give A access to B:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/dependency-injection.webp" alt="Dependency Injection" style="width: 230px; max-width: 100%; display: block; margin: 30px 0;" /><p>These kinds of operations can sometimes be performed by a <a href="https://en.wikipedia.org/wiki/Dependency_injection">dependency injection</a> framework, but under the hood, some of the operations above will be used.</p><p>The Hexagonal architecture originates from the object oriented world, and the code examples in Alistair’s <a href="https://alistair.cockburn.us/hexagonal-architecture/">article</a> uses dependency injection.</p><p>In the <code>1 + 2 * 3</code> example, we didn’t have to specify the relationships between the operators and the operands, which made the functional solution simpler and more readable.</p><p>Polylith originates from the functional world and takes this approach to software design. Bricks are composable, the same way <code>1 + 2 * 3</code> is, and we don’t need to specify how each brick depends on other bricks when we assemble them into projects at build time. It’s enough to specify which bricks to include:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/project.webp" alt="Project" style="width: 130px; max-width: 100%; display: block; margin: 30px 0;" /><p>Almost too simple!</p><p>In Polylith we don’t configure how the bricks depend on each other. As long as they compile in the development project, we are fine. All bricks have access to all components, or to be precise, all interfaces, and they are connected by using direct function calls.</p><p>So when a brick needs some functionality that is exposed in any of the interfaces, we don’t have to add an annotation, edit a configuration file or add a member to a class to gain access. All we have to do is to import the brick’s interface namespace in the code that needs it, in the exact same way we do with libraries. It doesn’t need to be more complicated than that!</p><p>Note that in some situations we need polymorphism at runtime, and when that happens, we need to solve that in a traditional way.</p><p>It would be possible to implement a variant of Polylith using dependency injection, but it would also be more complex and more like the object oriented example, and less like <code>1 + 2 * 3</code>:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/functional-vs-oo.webp" alt="Functional vs OO" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>The bottom line is that putting things side by side is more composable and less complex than putting things inside each other.</p><h3 id="reducing-complexity">Reducing complexity</h3><p>As you have probably already figured out, Polylith is very much a tool to fight complexity.</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/connections.webp" alt="Connections" style="width: 400px; max-width: 100%; display: block; margin: 30px 0;" /><p>I explain how composability, size, and other things affect complexity <a href="03-the-origin-of-complexity.html">here</a>.</p><h3 id="code-examples">Code examples</h3><p>If you want to compare different backend systems, there is a cool project called <a href="https://github.com/gothinkster/realworld">RealWorld</a> where different languages implement the same backend API spec.</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/realworld.webp" alt="Real World" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>There is an implementation using the Hexagonal architecture in Go <a href="https://github.com/labasubagia/realworld-backend">here</a>, and a Polylith example in Clojure <a href="https://github.com/furkan3ayraktar/clojure-polylith-realworld-example-app">here</a>.</p><p>You can explore the Polylith example without installing anything.</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/gitpod-polylith-realworld.webp" alt="Gitpod Polylith RealWorld" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>There are instructions <a href="https://github.com/PEZ/clojure-polylith-realworld-example-app/blob/master/gitpod.md">here</a> for getting a full development environment to a live Polylith Real World example running in your browser, with only a few clicks. It guides you in how to use Clojure so that you can experiment with Polylith!</p><h2 id="code-sharing">Code sharing</h2><p>The main goals of Polylith are to decrease complexity and make coding a more joyful experience. <a href="https://en.wikipedia.org/wiki/Duplicate_code">Code duplication</a> is generally considered undesirable, which is also why code sharing is built-in to Polylith.</p><p>We could create libraries as a way of sharing code within our system and across services. But that would also increase the complexity and harm the development experience, which we want to avoid.</p><p>Polylith solves the sharing problem at build time. These are the prerequisites for it to work:</p><ol><li>Use a <a href="https://en.wikipedia.org/wiki/Monorepo">monorepo</a>.</li><li>Use shareable Lego-like bricks at the source code level.</li><li>Enable subsets of bricks to be built into artifacts.</li></ol><p>Let’s go through them.</p><h3 id="use-a-monorepo">Use a monorepo</h3><p>In Polylith, we don&apos;t use libraries to share code between services and tools, because of the <a href="https://polylith.gitbook.io/polylith/introduction/sharing-code">problems that come with it</a>:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/monorepo-code-sharing.webp" alt="Monorepo Code Sharing" style="width: 380px; max-width: 100%; display: block; margin: 30px 0;" /><p>Once we abandon this idea, we need to use a monorepo.</p><h3 id="use-shareable-lego-like-bricks-at-the-source-code-level">Use shareable Lego-like bricks at the source code level</h3><p>You can think of Polylith bricks as blocks of code that can be shared across the entire system at build time and are connected with direct function calls in the same way we use libraries.</p><h3 id="enable-subsets-of-bricks-to-be-built-into-artifacts">Enable subsets of bricks to be built into artifacts</h3><p>Once the bricks are represented as plain source code, the next step is to be able to assemble subsets of them into projects and build artifacts from them.</p><p>This can be implemented in different ways, depending on which language and tools you use. The best way we have found is to let the code structure mirror the architecture’s building blocks (bricks and projects) and use IDEs and build tools that have support for multiple source directories.</p><p>Other variants include the use of <a href="https://en.wikipedia.org/wiki/Symbolic_link">symbolic links</a> or a single development project with just one source directory. None of these give the same level of decoupling and composability, so we stick with the multiple source directories variant here.</p><h3 id="examples">Examples</h3><p><a href="https://clojure.org/">Clojure</a>, together with <a href="https://github.com/clojure/tools.deps">tools.deps</a>, has built-in support for multiple source directories.</p><p>Here is an example taken from the <a href="https://github.com/furkan3ayraktar/clojure-polylith-realworld-example-app">clojure-polylith-realworld-example-app</a> project, which lists the bricks in a <a href="https://github.com/furkan3ayraktar/clojure-polylith-realworld-example-app/blob/master/projects/realworld-backend/deps.edn">deps.edn</a> config file:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/deps-config.webp" alt="Deps Config" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>In Python we have <a href="https://davidvujic.github.io/python-polylith-docs">Python tools for the Polylith Architecture</a> which uses Poetry together with the Multiproject plugin.</p><p>Here is an example that is taken from its documentation:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/python-config.webp" alt="Python Config" style="width: 600px; max-width: 100%; display: block; margin: 30px 0;" /><p>Another example is Java together with Maven. Java doesn’t support the use of multiple source directories out of the box, but it can be achieved with the <a href="https://www.mojohaus.org/build-helper-maven-plugin/usage.html">build-helper-maven-plugin</a>. Most Java IDEs support Maven based projects, which means we get the IDE integration for free.</p><p>As we mentioned earlier in the previous section, it would be possible to use dependency injection together with a monorepo to share code across applications, but that would also add more complexity and be less composable, which is why we avoid it.</p><h3 id="code-structure">Code structure</h3><p>The standardized code structure in Polylith helps us reason about the code, but it’s also part of the solution to the code sharing puzzle and how to support polymorphism at build time.</p><p>A Polylith codebase lives in a monorepo and is divided into one or more <a href="https://polylith.gitbook.io/polylith/architecture/2.1.-workspace">workspaces</a>. A workspace mirrors the core concepts of the Polylith architecture, like <code>bases</code>, <code>components</code>, and <code>projects</code>.</p><p>In this example, the workspace directory is also the root of the repository. It can have any name, but here we stick with <code>workspace</code>:</p><pre><code>▾ workspace
+  ▸ bases
+  ▸ components
+  ▸ development
+  ▸ projects
+</code></pre><p>Each brick and project lives in its own directory, e.g.:</p><pre><code><span style="color: #999;">
+▾ workspace
+  ▾ bases</span>
+    ▸ email-lambda
+    ▸ reporting-rest-api<span style="color: #999;">
+  ▾ components</span>
+    ▸ authentication
+    ▸ aws-lambda
+    ▸ database
+    ▸ logger
+    ▸ payment
+    ▸ signer<span style="color: #999;">
+  ▸ development
+  ▾ projects</span>
+    ▸ email
+    ▸ report-generator
+</code></pre><p>Each brick stores its own source directories, and each project lists the included bricks in a config file:</p><pre><code><span style="color: #999;">
+▾ workspace
+  ▾ bases
+    ▾ email-lambda</span>
+      ▸ src
+      ▸ test<span style="color: #999;">
+  ▾ components
+    ▸ authentication</span>
+      ▸ src
+      ▸ test<span style="color: #999;">
+  ▸ development
+  ▾ projects
+    ▾ email</span>
+      ▸ config.txt
+</code></pre><h3 id="base-2">base</h3><p>The namespaces for a base follow this structure:</p><p><code>top-namespace.<span style="color: #8B0000;">base-name</span>.namespaces</code></p><p>First we have the top namespace, which could be any valid namespace, e.g. <code>my.company</code>. Next we have the name of the base, e.g. <code style="color: #8B0000;">email-lambda</code>, followed by one or several namespaces which implement the public API and delegate to component interfaces.</p><h3 id="component-2">component</h3><p>A component is structured in a similar way, but has the interface name directly after the top namespace:</p><p><code>top-namespace.<span style="color: #8B0000;">interface-name</span>.mespaces</code></p><p style="margin-bottom: 0;">A component also has an interface namespace, that delegates incoming calls to implementing namespaces, e.g.:</p><code style="line-height: 1.3; display: block; margin-top: 0;">
+com.mycompany.<span style="color: #8B0000;">authentication</span>.interface
+com.mycompany.<span style="color: #8B0000;">authentication</span>.core
+com.mycompany.<span style="color: #8B0000;">authentication</span>.morestuff
+</code><p style="margin-top: 16px; margin-bottom: 0;">An option is to split the interface to sub namespaces, e.g.:</p><code style="line-height: 1.3; display: block; margin-top: 0;">
+com.mycompany.<span style="color: #8B0000;">authentication</span>.interface
+com.mycompany.<span style="color: #8B0000;">authentication</span>.sub-ifc
+</code><p style="margin-top: 16px;">Think of an interface in Polylith as a set of functions (and maybe constants and macros) that exposes a component’s functionality.</p><p>If more than one component implements the <code style="color: #8B0000;">authentication</code> interface, they will live in separate directories under <code>components</code> but use the same <code>com.mycompany.<span style="color: #8B0000;">authentication</span></code> namespace.</p><p>All bricks use the same top namespace, or <code>com.mycompany</code> as in this example.</p><h3 id="project-2">project</h3><p>Each project includes a configuration file that specifies the bricks to include in the project. This is often a single base and a set of components. How this looks depends on which library or build tool you use for your language of choice.</p><p>We can take the previously mentioned <code>realworld-backend</code> service as example:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/deps-config.webp" alt="Deps Config" style="width: 480px; max-width: 100%; display: block; margin: 30px 0;" /><p>The tooling gathers all the brick namespaces into one single “monolith”:</p><code style="line-height: 1.3; display: block; margin-top: 0;">
+clojure.realworld.<span style="color: #8B0000;">article</span>.interface
+clojure.realworld.<span style="color: #8B0000;">article</span>.interface.spec
+clojure.realworld.<span style="color: #8B0000;">article</span>.core
+clojure.realworld.<span style="color: #8B0000;">article</span>.spec
+clojure.realworld.<span style="color: #8B0000;">article</span>.store
+clojure.realworld.<span style="color: #8B0000;">comment</span>.interface
+clojure.realworld.<span style="color: #8B0000;">comment</span>.interface.spec
+clojure.realworld.<span style="color: #8B0000;">comment</span>.core
+clojure.realworld.<span style="color: #8B0000;">comment</span>.spec
+clojure.realworld.<span style="color: #8B0000;">comment</span>.store
+clojure.realworld.<span style="color: #8B0000;">database</span>.interface
+clojure.realworld.<span style="color: #8B0000;">database</span>.score
+clojure.realworld.<span style="color: #8B0000;">database</span>.schema
+clojure.realworld.<span style="color: #8B0000;">env</span>.interface
+clojure.realworld.<span style="color: #8B0000;">env</span>.core
+clojure.realworld.<span style="color: #8B0000;">log</span>.interface
+clojure.realworld.<span style="color: #8B0000;">log</span>.core
+clojure.realworld.<span style="color: #8B0000;">log</span>.config
+clojure.realworld.<span style="color: #8B0000;">profile</span>.interface
+clojure.realworld.<span style="color: #8B0000;">profile</span>.interface.spec
+clojure.realworld.<span style="color: #8B0000;">profile</span>.core
+clojure.realworld.<span style="color: #8B0000;">profile</span>.spec
+clojure.realworld.<span style="color: #8B0000;">profile</span>.store
+clojure.realworld.<span style="color: #8B0000;">spec</span>.interface
+clojure.realworld.<span style="color: #8B0000;">spec</span>.core
+clojure.realworld.<span style="color: #8B0000;">tag</span>.interface
+clojure.realworld.<span style="color: #8B0000;">tag</span>.core
+clojure.realworld.<span style="color: #8B0000;">user</span>.interface
+clojure.realworld.<span style="color: #8B0000;">user</span>.interface.spec
+clojure.realworld.<span style="color: #8B0000;">user</span>.core
+clojure.realworld.<span style="color: #8B0000;">user</span>.spec
+clojure.realworld.<span style="color: #8B0000;">user</span>.store
+</code><p style="margin-top: 16px;">From here we can run tests and build and deploy an artifact, e.g. a service.</p><h3 id="development-2">development</h3><p>As you already know, the <code>development</code> project is used to give us a monolithic user experience.</p><p>However, an important difference from other projects is that you never build and deploy the development project.</p><p>It’s also a place where you put code that is only used during development, for example code that fixes problems in the production database.</p><p>We can even let each developer have their own namespace, e.g. <code>dev.alanturing</code> or <code>dev.adalovelace</code>, where they can put code that they find useful during development.</p><h3 id="tooling-support">Tooling support</h3><p>A Polylith tool can give us additional value, for example help us enforce various constraints, like that bricks only access interfaces, or that all components fulfill the interface contracts. A tool can also help us run tests incrementally, or visualize different aspects of the architecture.</p><p>The <a href="https://cljdoc.org/d/polylith/clj-poly/CURRENT/doc/readme">poly tool</a>, written for Clojure and tools.deps is a good example. This is what the output of the <code>info</code> command looks like for the <a href="https://github.com/furkan3ayraktar/clojure-polylith-realworld-example-app">clojure-polylith-realworld-example-app example app</a>:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/realworld-info.webp" alt="Realworld Info" style="width: 330px; max-width: 100%; display: block; margin: 30px 0;" /><p>By looking at the names and the colors, we can see that this system has a <code>realworld-backend</code> REST service, exposed by the <code>rest-api</code> base, containing nine components with different responsibilities. This gives us a pretty good idea of what problems this system solves and how it&apos;s executed in production.</p><p>It also shows additional information, like the <code>e6f7f20</code> commit hash number and the <code>stable-master</code> <a href="https://git-scm.com/book/en/v2/Git-Basics-Tagging">git tag</a>, which was created when all tests passed in the continuous integration pipeline. This is a marker for the latest stable point in time, which is used by the tool to run tests incrementally.</p><p>The <code>s</code> and <code>t</code> flags tell us whether the <code>src</code> and/or <code>test</code> directories for a brick are included in a project.</p><p>Another example is the <code>deps</code> command:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/realworld-deps.webp" alt="Realworld Deps" style="width: 330px; max-width: 100%; display: block; margin: 30px 0;" /><p>It shows which interfaces (in yellow) each brick depends on. For example, the <code>rest-api</code> base depends on all interfaces, while the <code>tag</code> component only depends on the <code>database</code> interface.</p><p>Finally, here is the output from the <code>libs</code> command:</p><img src="assets/04-understanding-polylith-through-the-lens-of-hexagonal-architecture/realworld-libs.webp" alt="Realworld Libs" style="width: 600px; max-width: 100%; display: block; margin: 30px 0;" /><p>This shows which libraries that are in use, which bricks are using them, and which projects they will be included in.</p><p>The tool also supports incremental testing, which I try to describe <a href="https://polylith.gitbook.io/polylith/introduction/testing-incrementally">here</a>. Having tooling support like this gives the productivity an extra boost by speeding up the feedback loop.</p><p>At the time of writing, there is only tooling support for <a href="https://github.com/clojure/tools.deps">Clojure/tools.deps</a> and <a href="https://davidvujic.github.io/python-polylith-docs/">Python</a>, but we hope more languages will be added in the future. In the meantime, don’t be afraid of using Polylith, even if your language lacks tooling support, you will still get most of the benefits!</p><p>If you are curious about how real <a href="https://cljdoc.org/d/polylith/clj-poly/CURRENT/doc/production-systems">production systems</a> could look, please visit the production systems page of the poly tool documentation.</p><h3 id="summary">Summary</h3><p>A good thing with the Hexagonal architecture is that it separates concerns. However, Polylith takes separation of concerns to the next level.</p><p>Polylith is the first component-based architecture with truly small composable bricks that can be shared across the entire system.</p><p>The bricks help you focus on code quality, changeability, observability, testability, and efficiency, both when developing the code and when deciding on how to run the code in production.</p><p>If you haven’t tried Polylith yet, please do, because it’s a real joy to work with!</p><p>Happy coding!</p></div>
+
+<p><i>Published: 2023-11-01</i></p>
+
+<p>
+  <i>
+  Tagged:
+  
+  <span class="tag">
+    <a href="tags/architecture.html">architecture</a>
+  </span>
+  
+  <span class="tag">
+    <a href="tags/polylith.html">polylith</a>
+  </span>
+  
+  </i>
+</p>
+
+
+<!-- Hypothesis for text-selection comments (Medium-like) -->
+<script src="https://hypothes.is/embed.js" async></script>
+
+<!-- Giscus for discussion comments -->
+<script src="https://giscus.app/client.js"
+        data-repo="tengstrand/blog"
+        data-repo-id="R_kgDOQjTxDg"
+        data-category="Comments"
+        data-category-id="DIC_kwDOQjTxDs4Czh6g"
+        data-mapping="url"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light_high_contrast"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+<noscript>Please enable JavaScript to view the comments powered by Giscus.</noscript>
+
+
+    </div>
+    <script>
+      // Make navigation menu sticky using JavaScript
+      (function() {
+        function initStickyNav() {
+          var nav = document.querySelector('.site-nav');
+          if (!nav) {
+            // Retry after a short delay if nav not found
+            setTimeout(initStickyNav, 100);
+            return;
+          }
+          
+          // Check if already initialized
+          if (document.querySelector('.sticky-nav-wrapper')) return;
+          
+          // Get nav position and dimensions
+          var navRect = nav.getBoundingClientRect();
+          var navTop = navRect.top + window.pageYOffset;
+          
+          // Hide the original nav
+          nav.style.visibility = 'hidden';
+          nav.style.position = 'absolute';
+          
+          // Create a sticky wrapper with full-width background
+          var stickyWrapper = document.createElement('div');
+          stickyWrapper.className = 'sticky-nav-wrapper';
+          stickyWrapper.style.position = 'fixed';
+          stickyWrapper.style.top = '0';
+          stickyWrapper.style.left = '0';
+          stickyWrapper.style.right = '0';
+          stickyWrapper.style.width = '100%';
+          stickyWrapper.style.backgroundColor = 'white';
+          stickyWrapper.style.zIndex = '100';
+          stickyWrapper.style.boxShadow = 'none';
+          stickyWrapper.style.borderTop = 'none';
+          stickyWrapper.style.borderBottom = 'none';
+          
+          // Create inner wrapper for centered content
+          var innerWrapper = document.createElement('div');
+          innerWrapper.style.maxWidth = '600px';
+          innerWrapper.style.margin = '0 auto';
+          innerWrapper.style.padding = '0 15px';
+          innerWrapper.style.width = '100%';
+          innerWrapper.style.boxSizing = 'border-box';
+          innerWrapper.style.paddingTop = '0px';
+          innerWrapper.style.paddingBottom = '2px';
+          innerWrapper.style.borderBottom = '1px solid #e8e8e8';
+          
+          // Add white space below the gray line with a shorter fade
+          stickyWrapper.style.paddingBottom = '8px';
+          stickyWrapper.style.background = 'linear-gradient(to bottom, white 0%, white calc(100% - 8px), transparent 100%)';
+          stickyWrapper.appendChild(innerWrapper);
+          
+          // Clone nav and put it in inner wrapper (always visible)
+          var navClone = nav.cloneNode(true);
+          navClone.style.visibility = 'visible';
+          navClone.style.position = 'static';
+          navClone.style.marginTop = '0';
+          navClone.style.paddingTop = '5px';
+          innerWrapper.appendChild(navClone);
+          document.body.insertBefore(stickyWrapper, document.body.firstChild);
+          
+          // Hide site-header border-top to remove black line
+          var siteHeader = document.querySelector('.site-header');
+          if (siteHeader) {
+            siteHeader.style.borderTop = 'none';
+          }
+          
+          // Set body padding-top immediately to prevent jump
+          var stickyHeight = stickyWrapper.offsetHeight || 50;
+          document.body.style.paddingTop = stickyHeight + 'px';
+        }
+        
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initStickyNav);
+        } else {
+          // Small delay to ensure everything is loaded
+          setTimeout(initStickyNav, 50);
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>How Polylith came to life</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link type="application/atom+xml" rel="alternate" href="atom.xml" title="How Polylith came to life">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+      /* Prevent jump by setting padding-top immediately */
+      body { padding-top: 50px !important; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-clojure.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-python.min.js"></script>
+    <script type="text/javascript" src="https://livejs.com/live.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism.min.css">
+
+
+
+    <!-- Social sharing (Facebook, Twitter, LinkedIn, etc.) -->
+    <meta name="title" content="How Polylith came to life">
+    <meta name="twitter:title" content="How Polylith came to life">
+    <meta property="og:title" content="How Polylith came to life">
+    <meta property="og:type" content="website">
+
+
+    <meta name="twitter:url" content="https://tengstrand.github.io/blog/2018-10-02-how-polylith-came-to-life.html">
+    <meta property="og:url" content="https://tengstrand.github.io/blog/2018-10-02-how-polylith-came-to-life.html">
+
+
+    <meta name="twitter:image" content="https://tengstrand.github.io/blog/assets/02-how-polylith-came-to-life/polylith-logo.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:image" content="https://tengstrand.github.io/blog/assets/02-how-polylith-came-to-life/polylith-logo.png">
+    <meta property="og:image:alt" content="">
+
+
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M04G8Y5PWB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-M04G8Y5PWB');
+    </script>
+  </head>
+  <body>
+
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="index.html">Home</a>
+          <a class="page-link" href="archive.html">Archive</a>
+          <a class="page-link" href="tags/index.html">Tags</a>
+          
+	  <a class="page-link" href="atom.xml">
+            Feed
+          </a>
+          
+          
+        </div>
+        <div class="site-header-content">
+          <a href="index.html" style="text-decoration: none;">
+            <img src="assets/summer.jpeg" alt="Summer" class="site-header-image">
+          </a>
+          <div class="site-header-text">
+            <h1 class="site-title">
+              <a class="page-link" href="index.html">Tengstrand&#39;s Blog</a>
+            </h1>
+            <p>The search for simpler code while having fun.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+
+      <h1>
+  
+  How Polylith came to life
+  
+</h1>
+<div><img src="assets/02-how-polylith-came-to-life/polylith-text-and-logo.webp" alt="Polylith architecture logo" style="width: 400px; max-width: 100%; display: block; margin: 10px 0;" /><p>Today I&apos;m proud to announce a new software architecture, called Polylith!<sup id="fnref:1"><a href="#fn:1" class="footnote-ref">1</a></sup></p><p>I hope that Polylith can have a positive affect on the software industry, by focusing on simplicity and developer happiness and efficiency.</p><!-- end-of-preview --><p>Let’s start from the beginning. Two years ago I finally had the chance to work full time with the functional language <a href="https://en.wikipedia.org/wiki/Clojure">Clojure</a> and the functional database <a href="https://www.datomic.com/">Datomic</a>. I had read a book, blogged and played around with the language for a while, but now it was time to leave 20 years of Java behind me.</p><p>I joined a small team with one developer, a team leader and a UX designer. Even though only the team leader and I had any previous experience with Clojure and very little experience with Datomic, the whole team was up and running quickly and very soon became a hyper productive Dream Team!</p><p>A fantastic thing about Clojure is its <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a>. It allows you to work much faster compared to “up front” compiled languages like Java. Instead, it compiles the code incrementally. The result is lightning fast feedback, where you have direct access to all your data and compiled code. Once you have tried it, you will never look back!</p><p>After a month I questioned why we still had a Microservices architecture. It slowed us down because we now had a bunch of <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a>s instead of just one, and it also added a lot of boilerplate code and unnecessary complexity.</p><p>One morning on the train to work I got that eureka moment that you may get once in a lifetime. I realised that the solution was to turn the development environment into a monolith using <a href="https://en.wikipedia.org/wiki/Symbolic_link">symbolic links</a><sup id="fnref:2"><a href="#fn:2" class="footnote-ref">2</a></sup> to each &quot;component&quot;! This little trick worked out well and now we had our single REPL back again!</p><div class="image-with-caption" style="max-width: 600px;">
+<img src="assets/02-how-polylith-came-to-life/polylith-building-blocks.webp" alt="The three building blocks of Polylith">
+<small class="image-caption" style="display: block; text-align: center; margin-top: 0;">The three building blocks of Polylith</small>
+</div><p style="margin-top: 30px;"/><p>Two years have passed and we still love this way of designing systems. The components have become our friends that are easy to understand, reuse and combine into deployable systems. The <a href="https://github.com/polyfy/polylith">tool</a> helps us test and build our systems incrementally both locally and on the continuous integration server.</p><p>It’s not just efficient and fun, it has changed the way we think about design at the system level.</p><p>If this has made you curious, then head over to our <a href="https://polylith.gitbook.io/">high-level documentation</a> to find out more.</p><p>Happy coding!</p><p>Joakim Tengstrand</p><div class="footnotes">
+<ol>
+<li id="fn:1">
+<p>
+The predecessor to Polylith was called <a href="01-the-micro-monolith-architecture.html">Micro Monolith</a>, and if you look closely you will also notice that the logo has changed since this was posted: <img src="assets/02-how-polylith-came-to-life/polylith-logo.png" alt="Polylith logo" style="width: 24px; height: 24px; vertical-align: middle; display: inline-block; margin: 0 2px;">
+<a href="#fnref:1" class="footnote-backref">↩</a>
+</p>
+</li>
+<li id="fn:2">
+<p>
+Since October 2020, the new <a href="https://cljdoc.org/d/polylith/clj-poly/CURRENT">poly command line tool</a> uses <a href="https://clojure.org/guides/deps_and_cli">tools.deps</a> instead of <a href="https://en.wikipedia.org/wiki/Symbolic_link">symbolic links</a>.
+<a href="#fnref:2" class="footnote-backref">↩</a>
+</p>
+</li>
+</ol>
+</div></div>
+
+<p><i>Published: 2018-10-02</i></p>
+
+<p>
+  <i>
+  Tagged:
+  
+  <span class="tag">
+    <a href="tags/architecture.html">architecture</a>
+  </span>
+  
+  <span class="tag">
+    <a href="tags/clojure.html">clojure</a>
+  </span>
+  
+  <span class="tag">
+    <a href="tags/polylith.html">polylith</a>
+  </span>
+  
+  </i>
+</p>
+
+
+<!-- Hypothesis for text-selection comments (Medium-like) -->
+<script src="https://hypothes.is/embed.js" async></script>
+
+<!-- Giscus for discussion comments -->
+<script src="https://giscus.app/client.js"
+        data-repo="tengstrand/blog"
+        data-repo-id="R_kgDOQjTxDg"
+        data-category="Comments"
+        data-category-id="DIC_kwDOQjTxDs4Czh6g"
+        data-mapping="url"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light_high_contrast"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+<noscript>Please enable JavaScript to view the comments powered by Giscus.</noscript>
+
+
+    </div>
+    <script>
+      // Make navigation menu sticky using JavaScript
+      (function() {
+        function initStickyNav() {
+          var nav = document.querySelector('.site-nav');
+          if (!nav) {
+            // Retry after a short delay if nav not found
+            setTimeout(initStickyNav, 100);
+            return;
+          }
+          
+          // Check if already initialized
+          if (document.querySelector('.sticky-nav-wrapper')) return;
+          
+          // Get nav position and dimensions
+          var navRect = nav.getBoundingClientRect();
+          var navTop = navRect.top + window.pageYOffset;
+          
+          // Hide the original nav
+          nav.style.visibility = 'hidden';
+          nav.style.position = 'absolute';
+          
+          // Create a sticky wrapper with full-width background
+          var stickyWrapper = document.createElement('div');
+          stickyWrapper.className = 'sticky-nav-wrapper';
+          stickyWrapper.style.position = 'fixed';
+          stickyWrapper.style.top = '0';
+          stickyWrapper.style.left = '0';
+          stickyWrapper.style.right = '0';
+          stickyWrapper.style.width = '100%';
+          stickyWrapper.style.backgroundColor = 'white';
+          stickyWrapper.style.zIndex = '100';
+          stickyWrapper.style.boxShadow = 'none';
+          stickyWrapper.style.borderTop = 'none';
+          stickyWrapper.style.borderBottom = 'none';
+          
+          // Create inner wrapper for centered content
+          var innerWrapper = document.createElement('div');
+          innerWrapper.style.maxWidth = '600px';
+          innerWrapper.style.margin = '0 auto';
+          innerWrapper.style.padding = '0 15px';
+          innerWrapper.style.width = '100%';
+          innerWrapper.style.boxSizing = 'border-box';
+          innerWrapper.style.paddingTop = '0px';
+          innerWrapper.style.paddingBottom = '2px';
+          innerWrapper.style.borderBottom = '1px solid #e8e8e8';
+          
+          // Add white space below the gray line with a shorter fade
+          stickyWrapper.style.paddingBottom = '8px';
+          stickyWrapper.style.background = 'linear-gradient(to bottom, white 0%, white calc(100% - 8px), transparent 100%)';
+          stickyWrapper.appendChild(innerWrapper);
+          
+          // Clone nav and put it in inner wrapper (always visible)
+          var navClone = nav.cloneNode(true);
+          navClone.style.visibility = 'visible';
+          navClone.style.position = 'static';
+          navClone.style.marginTop = '0';
+          navClone.style.paddingTop = '5px';
+          innerWrapper.appendChild(navClone);
+          document.body.insertBefore(stickyWrapper, document.body.firstChild);
+          
+          // Hide site-header border-top to remove black line
+          var siteHeader = document.querySelector('.site-header');
+          if (siteHeader) {
+            siteHeader.style.borderTop = 'none';
+          }
+          
+          // Set body padding-top immediately to prevent jump
+          var stickyHeight = stickyWrapper.offsetHeight || 50;
+          document.body.style.paddingTop = stickyHeight + 'px';
+        }
+        
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initStickyNav);
+        } else {
+          // Small delay to ensure everything is loaded
+          setTimeout(initStickyNav, 50);
+        }
+      })();
+    </script>
+  </body>
+</html>
