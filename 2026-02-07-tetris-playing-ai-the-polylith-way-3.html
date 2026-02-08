@@ -84,8 +84,8 @@
   Tetris-playing AI the Polylith way - Part 3
   
 </h1>
-<div><img src="assets/07-tetris-playing-ai-the-polylith-way/rotations.png" alt="Tetris AI" style="width: 60%; max-width: 180px; height: auto; display: block; margin: 16px 0;"><p>I denna tredje del växer vår domän när vi lägger till <code>move</code>-komponenten, där vi implementerar en algoritm som beräknar alla giltiga flytt för en piece (<a href="https://en.wikipedia.org/wiki/Tetromino">Tetromino</a>) i sin startposition. Vi passar även på att förbättra läsbarheten för delar av koden som även fortsättningsvis skrivs i <a href="https://clojure.org/">Clojure</a> och <a href="https://www.python.org/">Python</a> tillsammans med den komponentbaserade arkitekturen <a href="https://polylith.gitbook.io/polylith/">Polylith</a>.</p><p>Tidigare delar:</p><ul><li><a href="05-tetris-playing-ai-the-polylith-way-1.html">Del 1</a> - Sätter en piece på en board. Visar skillnader mellan Clojure och Python och skapar komponenterna <code>piece</code> och <code>board</code>.</li><li><a href="05-tetris-playing-ai-the-polylith-way-1.html">Del 2</a> - Implementerar rensning av hela rader. Visar hur vi kan få snabb återkoppling genom att jobba REPL-drivet.</li></ul><!-- end-of-preview --><p>Källkoden till denna post hittar du här:</p><ul><li><a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-03/langs/clojure/tetris-polylith">Clojure workspace</a></li><li><a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-03/langs/python/tetris-polylith-uv">Python workspace</a></li></ul><h2 id="tetris-varianter">Tetris-varianter</h2><p>Tetris har släppt i en rad olika varianter, så som den handhållna <a href="https://en.wikipedia.org/wiki/Game_Boy">Game Boy</a>, konsollen <a href="https://en.wikipedia.org/wiki/Tetris_(NES_video_game)">Nintento NES</a>, och <a href="https://archive.org/details/arcade_atetris">detta</a> arkadspel från Atari, som jag i mina unga dagar spelade ohälsosamt mycket på en numera nedlagd biljardhall!</p><p>Alla varianter uppför sig lite olika vad gäller vilka färger bitarna har, var de startar och hur de roterar, med mera.</p><p>I de flesta varianter av Tetris startar bitarna i följande rotationslägen (liggande) innan de börjar falla:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/pieces.png" alt="Tetris pieces" style="width: 70%; max-width: 3000px; height: auto; display: block; margin: 16px 0;"><p>Var på brädet bitarna startar varierar också mellan de olika varianterna av Tetris. Till exempel så startar bitarna i femte x-position i Nintendo NES och Atari Arcade, medan de startar i fjärde x-position i Game Boy:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/start-position.png" alt="Start position" style="width: 60%; max-width: 150px; height: auto; display: block; margin: 16px 0;"><p>I dessa äldre varianter av Tetris roterar bitarna endast moturs, till skillnad mot vissa nyare spel där man kan rotera både med- och moturs.</p><p>Här jämför vi hur bitarna roterar för de tre nämnda varianterna av Tetris:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/rotation-table.png" alt="Rotation table" style="width: 100%; max-width: 250px; height: auto; display: block; margin: 16px 0;"><p>För Atari är bitarna orienterade mot övre vänstra hörnet (undantaget stående I), medan de mestadels roterar runt sitt centrum i de andra två varianterna.</p><p>I vår kod reprecenterar vi en piece genom att ange fyra [x y] celler:</p><pre><code class="language-clojure">[[0 1] [1 1] [2 1] [1 2]]
-</code></pre><p>Denna representation är enkel för koden att hantera, men kommunicerar dåligt för en människa vilken form en piece har.</p><p>Grundregeln är att kod ska skrivas så att den blir enkel att förstå för de som läser och ändrar i den (människor och på senare tid även AI-Agenter).</p><p>Låt oss därför definiera en piece så här istället:</p><pre><code class="language-clojure">(def T0 [&apos;---
+<div><img src="assets/07-tetris-playing-ai-the-polylith-way/rotations.png" alt="Tetris AI" style="width: 60%; max-width: 180px; height: auto; display: block; margin: 16px 0;"><p>I denna tredje del växer vår domän när vi lägger till <code>move</code>-komponenten, där vi implementerar en algoritm som beräknar alla giltiga flytt för en piece (<a href="https://en.wikipedia.org/wiki/Tetromino">Tetromino</a>) i sin startposition. Vi passar även på att förbättra läsbarheten för delar av koden som även fortsättningsvis skrivs i <a href="https://clojure.org/">Clojure</a> och <a href="https://www.python.org/">Python</a> tillsammans med den komponentbaserade arkitekturen <a href="https://polylith.gitbook.io/polylith/">Polylith</a>.</p><p>Tidigare delar:</p><ul><li><a href="05-tetris-playing-ai-the-polylith-way-1.html">Del 1</a> - Sätter en piece på en board. Visar skillnader mellan Clojure och Python och skapar komponenterna <code>piece</code> och <code>board</code>.</li><li><a href="05-tetris-playing-ai-the-polylith-way-1.html">Del 2</a> - Implementerar rensning av hela rader. Visar hur vi kan få snabb återkoppling genom att jobba REPL-drivet.</li></ul><!-- end-of-preview --><p>För att denna post inte ska svalla över med kod, har jag valt att mestadels visa Clojure-koden. Python-koden är dock väldigt lik, och vill du jämföra så finns all kod här:</p><ul><li><a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-03/langs/clojure/tetris-polylith">Clojure workspace</a></li><li><a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-03/langs/python/tetris-polylith-uv">Python workspace</a></li></ul><h2 id="tetris-varianter">Tetris-varianter</h2><p>Tetris har släppt i en rad olika varianter, så som den handhållna <a href="https://en.wikipedia.org/wiki/Game_Boy">Game Boy</a>, konsollen <a href="https://en.wikipedia.org/wiki/Tetris_(NES_video_game)">Nintento NES</a>, och <a href="https://archive.org/details/arcade_atetris">detta</a> arkadspel från Atari, som jag i mina unga dagar spelade ohälsosamt mycket på en numera nedlagd biljardhall!</p><p>Alla varianter uppför sig lite olika vad gäller vilka färger bitarna har, var de startar och hur de roterar, med mera.</p><p>I de flesta varianter av Tetris startar bitarna i följande rotationslägen (liggande) innan de börjar falla:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/pieces.png" alt="Tetris pieces" style="width: 70%; max-width: 3000px; height: auto; display: block; margin: 16px 0;"><p>Var på brädet bitarna startar varierar också mellan de olika varianterna av Tetris. Till exempel så startar bitarna i femte x-position i Nintendo NES och Atari Arcade, medan de startar i fjärde x-position i Game Boy:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/start-position.png" alt="Start position" style="width: 60%; max-width: 150px; height: auto; display: block; margin: 16px 0;"><p>I dessa äldre varianter av Tetris roterar bitarna endast moturs, till skillnad mot vissa nyare spel där man kan rotera både med- och moturs.</p><p>Här jämför vi hur bitarna roterar för de tre nämnda varianterna av Tetris:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/rotation-table.png" alt="Rotation table" style="width: 100%; max-width: 250px; height: auto; display: block; margin: 16px 0;"><p>För Atari är bitarna orienterade mot övre vänstra hörnet (undantaget stående I), medan de mestadels roterar runt sitt centrum i de andra två varianterna.</p><p>I vår kod reprecenterar vi en piece genom att ange fyra [x y] celler:</p><pre><code class="language-clojure">[[0 1] [1 1] [2 1] [1 2]]
+</code></pre><p>Denna representation är enkel för koden att hantera, men kommunicerar dåligt för en människa vilken form en piece har.</p><p>Grundregeln är att kod ska skrivas så att den blir enkel att förstå för de som läser och ändrar den (människor och på senare tid även AI-Agenter).</p><p>Låt oss därför definiera en piece så här istället:</p><pre><code class="language-clojure">(def T0 [&apos;---
          &apos;xxx
          &apos;-x-])
 </code></pre><p>Python:</p><pre><code class="language-python">T0 = [
@@ -286,44 +286,93 @@ def shapes(pieces_grids):
         [shape(piece-grid) for piece_grid in piece_grids]
         for piece_grids in pieces_grids
     ]
-</code></pre><p>Här använder vi <a href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions">list comprehension</a> för att konvertera till [x, y] celler. Funktionen <a href="https://docs.python.org/3/library/functions.html#enumerate">enumerate</a> har samma funktion som <a href="https://clojuredocs.org/clojure.core/map-indexed">map-indexed</a> i Clojure, att lägga till ett index (0, 1, 2, ...) för varje element.</p><h2 id="domänmodellering">Domänmodellering</h2><p>Den nya koden som beräknar giltiga flytt av en piece i sin ursprungsposition, behöver ligga någonstans. Vi behöver kunna flytta och rotera en piece, och testa om platsen är ledig på en board. Detta gör att logiken ligger i gränslandet mellan <code>piece</code> och <code>board</code>.</p><p>I Polylith används komponenter för att modellera domänen och i det här fallet får den nya koden bo i komponenten <code>move</code>:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/components.png" alt="Components" style="width: 80%; max-width: 600px; height: auto; display: block; margin: 16px 0;"><p>Den nya komponenten exponerar funktionen <code>placements</code> i sitt interface. Pilarna visar hur komponenterna används sinsemellan.</p><p>Låt oss titta på testet:</p><pre><code class="language-clojure">(ns tetrisanalyzer.move.placement-test
+</code></pre><p>Här använder vi <a href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions">list comprehension</a> för att konvertera till [x, y] celler. Funktionen <a href="https://docs.python.org/3/library/functions.html#enumerate">enumerate</a> har samma funktion som <a href="https://clojuredocs.org/clojure.core/map-indexed">map-indexed</a> i Clojure, att lägga till ett index (0, 1, 2, ...) för varje element.</p><h2 id="domänmodellering">Domänmodellering</h2><p>Den nya koden som beräknar giltiga flytt av en piece i sin ursprungsposition, behöver ligga någonstans. Vi behöver kunna flytta och rotera en <code>piece</code>, och testa om platsen är ledig på en <code>board</code>. Detta gör att logiken ligger i gränslandet mellan <code>piece</code> och <code>board</code>.</p><p>I Polylith används komponenter för att modellera domänen och i det här fallet beslutade jag mig för att den nya koden får bo i komponenten <code>move</code>:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/components.png" alt="Components" style="width: 80%; max-width: 600px; height: auto; display: block; margin: 16px 0;"><p>Inom varje komponent listar vi vad som ingår i dess interface (vad som är publikt) medan pilarna anger hur komponenterna används sinsemellan.</p><p>Implementationen delar vi upp i namespacen <code>move</code>, <code>visit</code>, och <code>placement</code>:</p><pre><code class="language-shell">▾ tetris-polylith
+  ▸ bases
+  ▾ components
+    ▸ board
+    ▾ move
+      ▾ src
+        interface.clj
+        move.clj
+        placement.clj
+        visit.clj
+      ▾ test
+        move_test.clj
+        placement_test.clj
+        visit_test.clj
+    ▸ piece
+  ▸ development
+  ▸ projects
+</code></pre><p>Så här ser <code>move-test</code> ut:</p><pre><code class="language-clojure">(ns tetrisanalyzer.move.move-test
   (:require [clojure.test :refer :all]
+            [tetrisanalyzer.move.move :as move]
+            [tetrisanalyzer.board.interface :as board]
             [tetrisanalyzer.piece.interface :as piece]
-            [tetrisanalyzer.move.placement :as valid-moves]
             [tetrisanalyzer.piece.settings.atari-arcade :as atari-arcade]))
 
-(def start-x 2)
-(def sorter (juxt second first last))
-
-(def board [[0 0 0 0 0 0]
-            [0 0 1 1 0 0]
-            [0 0 1 0 0 1]
-            [0 0 1 1 1 1]])
-
+(def x 2)
+(def y 1)
+(def rotation 0)
+(def S piece/S)
 (def shapes atari-arcade/shapes)
+(def bitmask (piece/rotation-bitmask shapes S))
+(def piece (piece/piece S rotation shapes))
 
-;; Start position of the J piece:
-;; --JJJ-
-;; --xxJ-
-;; --x--x
-;; --xxxx
-(deftest placements--without-rotation-kick
-  (is (= [[2 0 0]
-          [3 0 0]]
-         (sort-by sorter (valid-moves/placements board piece/J start-x false shapes)))))
+(def board (board/board [&apos;xxxxxxxx
+                         &apos;xxx--xxx
+                         &apos;xx--xxxx
+                         &apos;xxxxxxxx]))
 
-;; With rotation kick, checking if x-1 fits:
-;; -JJ---
-;; -Jxx--
-;; -Jx--x
-;; --xxxx
-(deftest placements--with-rotation-kick
-  (is (= [[1 0 1]
-          [2 0 0]
-          [3 0 0]
-          [0 1 1]]
-         (sort-by sorter (valid-moves/placements board piece/J start-x true shapes)))))
-</code></pre><p>Detta testar att vi får tillbaka de giltiga [x y rotation]-positionerna som en piece kan placeras på ett bräde utifrån sin ursprungsposition.</p><p>Det fjärde argumentet till <code>placements</code> är flaggan <code>kick?</code> som om satt, säger att vi även ska testa x-1, ifall x är uppdagen. Detta är avslaget för <a href="https://sv.wikipedia.org/wiki/Nintendo_Entertainment_System">Nintendo NES</a> men påslaget för de övriga två varianterna.</p><p>Nästa steg är att implementera följande kod i <code>move</code>-komponenten, som hanterar flytt av piece på en board:</p><pre><code class="language-clojure">(ns tetrisanalyzer.move.move
+(deftest valid-move
+  (is (= true
+         (move/valid-move? board x y S rotation shapes))))
+
+(deftest valid-left-move
+  (is (= [2 1 0]
+         (move/left board (inc x) y S rotation nil shapes))))
+
+(deftest invalid-left-move
+  (is (= nil
+         (move/left board x y S rotation nil shapes))))
+
+(deftest valid-right-move
+  (is (= [2 1 0]
+         (move/right board (dec x) y S rotation nil shapes))))
+
+(deftest invalid-right-move
+  (is (= nil
+         (move/right board x (dec y) S rotation nil shapes))))
+
+(deftest unoccupied-down-move
+  (is (= [[2 1 0] nil]
+         (move/down board x (dec y) S rotation nil shapes))))
+
+(deftest down-move-hits-ground
+  (is (= [nil [[2 1 0]]]
+         (move/down board x y S rotation nil shapes))))
+
+(deftest valid-rotation
+  (is (= [2 1 0]
+         (move/rotate board x y S (dec rotation) bitmask shapes))))
+
+(deftest invalid-rotation-without-kick
+  (is (= nil
+         (move/rotate board (inc x) y S (inc rotation) bitmask shapes))))
+
+(deftest valid-rotation-with-kick
+  (is (= [2 1 0]
+         (move/rotate-with-kick board (inc x) y S (inc rotation) bitmask shapes))))
+
+(deftest invalid-move-outside-board
+  (is (= false
+         (move/valid-move? board 10 -10 S rotation shapes))))
+</code></pre><p>Det första testet <code>valid-move</code> validerar att S-biten:</p><pre><code class="language-clojure">[&apos;-xx
+ &apos;xx-]
+</code></pre><p>Kan placers på position x=2, y=1:</p><pre><code class="language-clojure">[&apos;xxxxxxxx
+ &apos;xxx--xxx
+ &apos;xx--xxxx
+ &apos;xxxxxxxx]
+</code></pre><p>Utöver det, testas olika varianter av giltiga flytt och rotation in till det tomma området, samt ogiltiga flytt utanför området.</p><p>I Tetris finns det något som kallas kick, eller <a href="https://harddrop.com/wiki/Wall_kick">wall kick</a>. När man roterar en bit och positionen är upptagen på brädet, kommer även x-1 att testas (ett steg till vänster). På <a href="https://sv.wikipedia.org/wiki/Nintendo_Entertainment_System">Nintendo NES</a> är detta avslaget, medan den är aktiverad på de övriga två varianterna vi stödjer här. På nyare Tetris testas ibland även andra placeringar än x-1.</p><p>Implementationen ser ut så här:</p><pre><code class="language-clojure">(ns tetrisanalyzer.move.move
   (:require [tetrisanalyzer.piece.interface :as piece]))
 
 (defn cell [board x y [cx cy]]
@@ -365,7 +414,7 @@ def shapes(pieces_grids):
   (if rotation-kick?
     rotate-with-kick
     rotate))
-</code></pre><p>I Tetris finns det något som kallas kick, eller <a href="https://harddrop.com/wiki/Wall_kick">wall kick</a>. När man roterar en bit och positionen är upptagen på brädet, kommer även x-1 att testas (ett steg till vänster) om kick är aktiverat. På Nintendo NES är detta avslaget. På nyare varianter av Tetris, testas ibland även andra placeringar än x-1.</p><p>I algoritmen som letar fram alla giltiga flytt, vill vi hoppa över flytt som redan besökts för att snabba på beräkningen, med hjälp av följande kod i <code>move</code> komponenten:</p><pre><code class="language-clojure">(ns tetrisanalyzer.move.visit)
+</code></pre><p>Funktionerna är ganska enkla som synes, så låt oss istället titta på koden som hjälper oss hålla reda på vilka flytt som redan besökts:</p><pre><code class="language-clojure">(ns tetrisanalyzer.move.visit)
 
 (defn visited? [visited-moves x y rotation]
   (if-let [visited-rotations (get-in visited-moves [y x])]
@@ -376,7 +425,81 @@ def shapes(pieces_grids):
 (defn visit [visited-moves x y rotation]
   (assoc-in visited-moves [y x] (bit-or (get-in visited-moves [y x])
                                         (bit-shift-left 1 rotation))))
-</code></pre><p>Anropet till <a href="https://clojuredocs.org/clojure.core/bit-shift-left">bit-shift-left</a> returnerar en satt bit i någon av de fyra lägsta bitarna:</p><table><thead><tr><th style="text-align:center;">rotation</th><th style="text-align:center;">bit</th></tr></thead><tbody><tr><td style="text-align:center;">0</td><td style="text-align:center;"><code>0001</code></td></tr><tr><td style="text-align:center;">1</td><td style="text-align:center;"><code>0010</code></td></tr><tr><td style="text-align:center;">2</td><td style="text-align:center;"><code>0100</code></td></tr><tr><td style="text-align:center;">3</td><td style="text-align:center;"><code>1000</code></td></tr></tbody></table><p>Dessa &quot;flaggor&quot; används sedan för att markera att vi besökt ett visst [x y rotation] flytt på ett bräde. Notera att vi skickar in ett &quot;besöks-bräde&quot; (visited-moves) till <code>visited</code> och får tillbaka en kopia där [x y] cellen har en bit satt för angiven rotation.</p><p>Så här ser implementerar vi framräkning av möjliga flytt:</p><pre><code class="language-clojure">(ns tetrisanalyzer.move.placement
+</code></pre><p>Anropet till standardfunktionen <a href="https://clojuredocs.org/clojure.core/bit-shift-left">bit-shift-left</a> returnerar en satt bit i någon av de fyra lägsta bitarna:</p><table><thead><tr><th style="text-align:center;">rotation</th><th style="text-align:center;">bit</th></tr></thead><tbody><tr><td style="text-align:center;">0</td><td style="text-align:center;"><code>0001</code></td></tr><tr><td style="text-align:center;">1</td><td style="text-align:center;"><code>0010</code></td></tr><tr><td style="text-align:center;">2</td><td style="text-align:center;"><code>0100</code></td></tr><tr><td style="text-align:center;">3</td><td style="text-align:center;"><code>1000</code></td></tr></tbody></table><p>Dessa &quot;flaggor&quot; används sedan för att markera att vi besökt ett visst [x y rotation] flytt på ett bräde. Notera att vi skickar in ett &quot;besöks-bräde&quot; (visited-moves) till <code>visited</code> och får tillbaka en kopia där [x y] cellen har en bit satt för angiven rotation. Denna &quot;kopiering&quot; är dock väldigt snabb och minneseffektiv, se &quot;structural sharing&quot; under <a href="https://clojure.org/reference/data_structures">Data Structures</a>.</p><p>Testerna ser ut så här:</p><pre><code class="language-clojure">(ns tetrisanalyzer.move.visit-test
+  (:require [clojure.test :refer :all]
+            [tetrisanalyzer.move.visit :as visit]))
+
+(def x 2)
+(def y 1)
+(def rotation 3)
+(def unvisited [[0 0 0 0]
+                [0 0 0 0]])
+
+(deftest move-is-not-visited
+  (is (= false
+         (visit/visited? unvisited x y rotation))))
+
+(deftest move-is-visited
+  (let [visited (visit/visit unvisited x y rotation)]
+    (is (= true
+           (visit/visited? visited x y rotation)))))
+</code></pre><p>Python:</p><pre><code class="language-python">from tetrisanalyzer.move.visit import is_visited, visit
+
+X = 2
+Y = 1
+ROTATION = 3
+UNVISITED = [
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+]
+
+
+def test_move_is_not_visited():
+    assert is_visited(UNVISITED, X, Y, ROTATION) is False
+
+
+def test_move_is_visited():
+    visited = [row[:] for row in UNVISITED]
+    visit(visited, X, Y, ROTATION)
+    assert is_visited(visited, X, Y, ROTATION) is True
+</code></pre><p>Nu har vi bäddat för att kunna implementera koden som räknar ut alla giltiga flytt för en piece i sin ursprungsposition, funktionen <code>placements</code>.</p><p>Vi börjar med testet:</p><pre><code class="language-clojure">(ns tetrisanalyzer.move.placement-test
+  (:require [clojure.test :refer :all]
+            [tetrisanalyzer.piece.interface :as piece]
+            [tetrisanalyzer.move.placement :as valid-moves]
+            [tetrisanalyzer.piece.settings.atari-arcade :as atari-arcade]))
+
+(def start-x 2)
+(def sorter (juxt second first last))
+
+(def board [[0 0 0 0 0 0]
+            [0 0 1 1 0 0]
+            [0 0 1 0 0 1]
+            [0 0 1 1 1 1]])
+
+(def shapes atari-arcade/shapes)
+
+;; Start position of the J piece:
+;; --JJJ-
+;; --xxJ-
+;; --x--x
+;; --xxxx
+(deftest placements--without-rotation-kick
+  (is (= [[2 0 0]
+          [3 0 0]]
+         (sort-by sorter (valid-moves/placements board piece/J start-x false shapes)))))
+
+;; With rotation kick, checking if x-1 fits:
+;; -JJ---
+;; -Jxx--
+;; -Jx--x
+;; --xxxx
+(deftest placements--with-rotation-kick
+  (is (= [[1 0 1]
+          [2 0 0]
+          [3 0 0]
+          [0 1 1]]
+         (sort-by sorter (valid-moves/placements board piece/J start-x true shapes)))))
+</code></pre><p>Detta testar att vi får tillbaka de giltiga [x y rotation]-positioner som en piece kan placeras på ett bräde utifrån sin ursprungsposition.</p><p>Notera att vi importerar namespacet <code>tetrisanalyzer.piece.settings.atari-arcade</code>, från en annan komponent <code>piece</code>. I Polylith är det bara tillåtet att accessa en annan komponent via dess interface från produktionskoden. Från testkoden är vi dock fria att access alla namespaces, vilket gör att vi inte behöver exponera denna funktionalitet i <code>piece</code>&apos;s interface.</p><p>Implementationen:</p><pre><code class="language-clojure">(ns tetrisanalyzer.move.placement
   (:require [tetrisanalyzer.move.move :as move]
             [tetrisanalyzer.move.visit :as visit]
             [tetrisanalyzer.board.interface :as board]
@@ -415,7 +538,7 @@ def shapes(pieces_grids):
        valid-moves valid-moves
        visited-moves visited-moves]
 </code></pre><p>Dessa fyra rader initierar det data vi vill loopa på, där <code>next-moves</code> är den lista med moves vi behöver gå igenom och som växer och betas av löpande, och där <code>placements</code> ackumulerar giltiga flytt.</p><p>Då Clojure ej stödjer <a href="https://en.wikipedia.org/wiki/Tail_call">tail-recursion</a>, finns istället <a href="https://clojuredocs.org/clojure.core/loop">loop</a> att tillgå som alternativ till en rekursiv lösning, vilket vi vill undvika för att inte få problem med stack overflow om vi skulle använda bräden större än 10x20.</p><pre><code class="language-clojure">(if-let [[x y rotation] (first next-moves)]
-</code></pre><p>Hämtar nästa move från <code>next-moves</code> och fortsätter med koden direkt under, eller returnerar <code>placements</code> (sista raden i funktionen) om <code>next-moves</code> är tom, vilket är det slutgiltiga resultatet av giltiga flytt.</p><pre><code class="language-clojure">(let [next-moves (rest next-moves)]
+</code></pre><p>Hämtar nästa move från <code>next-moves</code> och fortsätter med koden direkt under, eller returnerar <code>placements</code> (sista raden i funktionen) om <code>next-moves</code> är tom, vilket är alla giltiga flytt.</p><pre><code class="language-clojure">(let [next-moves (rest next-moves)]
 </code></pre><p>Drop:ar första elementet i <code>next-moves</code>, som vi precis har plockat ut.</p><pre><code class="language-clojure">(if (visit/visited? visited-moves x y rotation)
 </code></pre><p>Om flyttet redan besökts, fortsätt med:</p><pre><code class="language-clojure">(recur next-moves placements valid-moves visited-moves)
 </code></pre><p>Som fortsätter vår sökning efter giltiga flytt (raden efter <code>(loop [...]</code>), genom att gå till nästa flytt att utvärdera.</p><p>Annars, om flyttet ej har besökts, fortsätt med:</p><pre><code class="language-clojure">(let [[down placement] (move/down board x y p rotation bitmask shapes)
@@ -442,21 +565,7 @@ def shapes(pieces_grids):
     (if (move/valid-move? board x y p rotation shapes)
       (-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)
       [])))
-</code></pre><ul><li><code>board</code>: en tvådimensionell vektor som representerar en board, oftast 10x20.</li><li><code>p</code>: piece index (0, 1, 2, 3, 4, 5, eller 6).</li><li><code>x</code>: vilken kolumn 4x4-griden startar (där biten finns). Första kolumnen är 0.</li><li><code>y</code>: satt till 0 (översta raden) och anger position för 4x4-griden startar (där biten finns).</li><li><code>rotation</code> satt till 0 (start-rotation).</li><li><code>bitmask</code>: används vid uppräkning av <code>rotation</code> så att den börjar om på 0 när nått slutet på det antal rotationer den kan göra.</li><li><code>visited-moves</code>: har samma struktur som en board, d.v.s en tvådimensionell array av vektorer, oftast 10x20.</li><li><code>rotation-fn</code>: returnerar rätt rotationsfunktion beroende på om kick är aktivt eller ej. Testar även position x-1 om kick? är true.</li><li><code>shapes</code>: formerna för alla pieces och dess rotationslägen, lagrade som [x y] celler.</li><li><code>(if (move/valid-move? board x y p rotation shapes)</code>: vi måste testa ifall den initiala positionen är ledig eller ej, och returnera en tom lista (vektor) om ej ledig.</li><li><code>(-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)</code> beräknar de giltiga flytten.</li></ul><h2 id="sammanfattning">Sammanfattning</h2><p>I denna tredje del tog jag mig an den svåraste uppgiften hittills, att räkna ut alla giltiga flytt för en bit i sin startposition.</p><p>Jag undvek att implementera det som en rekursiv algoritm, då vi annars blir begränsade i hur stora bräden vi kan hantera, då det riskerar att konsumera för mycket stack.</p><p>Den nya koden behövde bo någonstans, men varken <code>piece</code> eller <code>board</code> kändes rätt, så istället tillkom tillkom den nya <code>move</code>-komponenten som vi implementerade i tre olika namespaces + interfacet:</p><pre><code class="language-shell">▾ tetris-polylith
-  ▸ bases
-  ▾ components
-    ▸ board
-    ▾ move
-      ▾ src
-        interface.clj
-        move.clj
-        placement.clj
-        visit.clj
-      ▸ test
-    ▸ piece
-  ▸ development
-  ▸ projects
-</code></pre><p>Vi passade även på att göra koden lättare att jobba med, genom att specificera bitarna på ett mer läsbart sätt, och med den ändringen kunde vi enkelt stödja tre olika varianter av Tetris.</p><p>Hoppas du hade lika kul som jag 😃</p><p>Happy coding!</p></div>
+</code></pre><ul><li><code>board</code>: en tvådimensionell vektor som representerar en board, oftast 10x20.</li><li><code>p</code>: piece index (0, 1, 2, 3, 4, 5, eller 6).</li><li><code>x</code>: vilken kolumn 4x4-griden startar (där biten finns). Första kolumnen är 0.</li><li><code>y</code>: satt till 0 (översta raden) och anger startrad för 4x4-griden.</li><li><code>rotation</code> satt till 0 (start-rotation).</li><li><code>bitmask</code>: används vid uppräkning av <code>rotation</code> så att den börjar om på 0 när nått slutet på det antal rotationer den kan göra.</li><li><code>visited-moves</code>: har samma struktur som en board, d.v.s en tvådimensionell array av vektorer, oftast 10x20.</li><li><code>rotation-fn</code>: returnerar rätt rotationsfunktion beroende på om kick är aktivt eller ej. Testar även position x-1 om kick? är true.</li><li><code>shapes</code>: formerna för alla pieces och dess rotationslägen, lagrade som [x y] celler.</li><li><code>(if (move/valid-move? board x y p rotation shapes)</code>: vi måste testa ifall den initiala positionen är ledig eller ej, och returnera en tom lista (vektor) om ej ledig.</li><li><code>(-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)</code> beräknar de giltiga flytten.</li></ul><h2 id="sammanfattning">Sammanfattning</h2><p>I denna tredje del tog jag mig an den svåraste uppgiften hittills, att räkna ut alla giltiga flytt för en bit i sin startposition.</p><p>Jag undvek att implementera det som en rekursiv algoritm, då vi annars blir begränsade i hur stora bräden vi kan hantera.</p><p>Den nya koden behövde bo någonstans, men varken <code>piece</code> eller <code>board</code> kändes rätt, så istället tillkom den nya <code>move</code>-komponenten.</p><p>Vi passade även på att göra koden lättare att jobba med, genom att specificera bitarna på ett mer läsbart sätt, och med den ändringen kunde vi enkelt stödja tre olika varianter av Tetris.</p><p>Hoppas du hade lika kul som jag 😃</p><p>Happy coding!</p></div>
 
 <p><i>Published: 2026-02-07</i></p>
 
