@@ -3,7 +3,7 @@
   <title>Tengstrand's Blog</title>
   <link href="https://tengstrand.github.io/blog/atom.xml" rel="self"/>
   <link href="https://tengstrand.github.io/blog/"/>
-  <updated>2026-02-09T06:51:10+00:00</updated>
+  <updated>2026-02-09T07:51:12+00:00</updated>
   <id>https://tengstrand.github.io/blog/</id>
   <author>
     <name>Joakim Tengstrand</name>
@@ -568,7 +568,7 @@ test/components/tetrisanalyzer/move/test_visit.py ..                            
 test/components/tetrisanalyzer/piece/test_shape.py .                                                                                               [100%]
 
 =================================================================== 21 passed in 0.02s ===================================================================
-</code></pre><p>Det fungerar!</p><h2 id="sammanfattning">Sammanfattning</h2><p>I denna tredje del tog jag mig an den svåraste uppgiften hittills, att räkna ut alla giltiga flytt för en bit i sin startposition.</p><p>Jag undvek att implementera det som en rekursiv algoritm, då vi annars blir begränsade i hur stora bräden vi kan hantera.</p><p>Den nya koden behövde bo någonstans, men varken <code>piece</code> eller <code>board</code> kändes rätt, så istället tillkom den nya <code>move</code>-komponenten.</p><p>Vi passade även på att göra koden lättare att jobba med, genom att specificera bitarna på ett mer läsbart sätt, och med den ändringen kunde vi enkelt stödja tre olika varianter av Tetris.</p><p>Hoppas du hade lika kul som jag 😃</p><p>Happy coding!</p></div>]]></content>
+</code></pre><p>Alla tester gick igenom!</p><h2 id="sammanfattning">Sammanfattning</h2><p>I denna tredje del tog jag mig an den svåraste uppgiften hittills, att räkna ut alla giltiga flytt för en bit i sin startposition.</p><p>Jag undvek att implementera det som en rekursiv algoritm, då vi annars blir begränsade i hur stora bräden vi kan hantera.</p><p>Den nya koden behövde bo någonstans, men varken <code>piece</code> eller <code>board</code> kändes rätt, så istället tillkom den nya <code>move</code>-komponenten.</p><p>Vi passade även på att göra koden lättare att jobba med, genom att specificera bitarna på ett mer läsbart sätt, och med den ändringen kunde vi enkelt stödja tre olika varianter av Tetris.</p><p>Hoppas du hade lika kul som jag 😃</p><p>Happy coding!</p></div>]]></content>
   </entry>
   <entry>
     <id>https://tengstrand.github.io/blog/2026-01-11-tetris-playing-ai-the-polylith-way-2.html</id>
