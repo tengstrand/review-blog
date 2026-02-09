@@ -3,7 +3,7 @@
   <title>Tengstrand's Blog</title>
   <link href="https://tengstrand.github.io/blog/atom.xml" rel="self"/>
   <link href="https://tengstrand.github.io/blog/"/>
-  <updated>2026-02-08T19:31:32+00:00</updated>
+  <updated>2026-02-09T06:51:10+00:00</updated>
   <id>https://tengstrand.github.io/blog/</id>
   <author>
     <name>Joakim Tengstrand</name>
@@ -494,7 +494,81 @@ def test_move_is_visited():
     (if (move/valid-move? board x y p rotation shapes)
       (-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)
       [])))
-</code></pre><ul><li><code>board</code>: en tvådimensionell vektor som representerar en board, oftast 10x20.</li><li><code>p</code>: piece index (0, 1, 2, 3, 4, 5, eller 6).</li><li><code>x</code>: vilken kolumn 4x4-griden startar (där biten finns). Första kolumnen är 0.</li><li><code>y</code>: satt till 0 (översta raden) och anger startrad för 4x4-griden.</li><li><code>rotation</code> satt till 0 (start-rotation).</li><li><code>bitmask</code>: används vid uppräkning av <code>rotation</code> så att den börjar om på 0 när nått slutet på det antal rotationer den kan göra.</li><li><code>visited-moves</code>: har samma struktur som en board, d.v.s en tvådimensionell array av vektorer, oftast 10x20.</li><li><code>rotation-fn</code>: returnerar rätt rotationsfunktion beroende på om kick är aktivt eller ej. Testar även position x-1 om kick? är true.</li><li><code>shapes</code>: formerna för alla pieces och dess rotationslägen, lagrade som [x y] celler.</li><li><code>(if (move/valid-move? board x y p rotation shapes)</code>: vi måste testa ifall den initiala positionen är ledig eller ej, och returnera en tom lista (vektor) om ej ledig.</li><li><code>(-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)</code> beräknar de giltiga flytten.</li></ul><h2 id="sammanfattning">Sammanfattning</h2><p>I denna tredje del tog jag mig an den svåraste uppgiften hittills, att räkna ut alla giltiga flytt för en bit i sin startposition.</p><p>Jag undvek att implementera det som en rekursiv algoritm, då vi annars blir begränsade i hur stora bräden vi kan hantera.</p><p>Den nya koden behövde bo någonstans, men varken <code>piece</code> eller <code>board</code> kändes rätt, så istället tillkom den nya <code>move</code>-komponenten.</p><p>Vi passade även på att göra koden lättare att jobba med, genom att specificera bitarna på ett mer läsbart sätt, och med den ändringen kunde vi enkelt stödja tre olika varianter av Tetris.</p><p>Hoppas du hade lika kul som jag 😃</p><p>Happy coding!</p></div>]]></content>
+</code></pre><ul><li><code>board</code>: en tvådimensionell vektor som representerar en board, oftast 10x20.</li><li><code>p</code>: piece index (0, 1, 2, 3, 4, 5, eller 6).</li><li><code>x</code>: vilken kolumn 4x4-griden startar (där biten finns). Första kolumnen är 0.</li><li><code>y</code>: satt till 0 (översta raden) och anger startrad för 4x4-griden.</li><li><code>rotation</code> satt till 0 (start-rotation).</li><li><code>bitmask</code>: används vid uppräkning av <code>rotation</code> så att den börjar om på 0 när nått slutet på det antal rotationer den kan göra.</li><li><code>visited-moves</code>: har samma struktur som en board, d.v.s en tvådimensionell array av vektorer, oftast 10x20.</li><li><code>rotation-fn</code>: returnerar rätt rotationsfunktion beroende på om kick är aktivt eller ej. Testar även position x-1 om kick? är true.</li><li><code>shapes</code>: formerna för alla pieces och dess rotationslägen, lagrade som [x y] celler.</li><li><code>(if (move/valid-move? board x y p rotation shapes)</code>: vi måste testa ifall den initiala positionen är ledig eller ej, och returnera en tom lista (vektor) om ej ledig.</li><li><code>(-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)</code> beräknar de giltiga flytten.</li></ul><h2 id="testning">Testning</h2><p>Avslutningsvis kör vi våra tester:</p><pre><code class="language-clojure">$&gt; cd ~/source/tetrisanalyzer/langs/clojure/tetris-polylith
+$&gt; poly test :dev
+Projects to run tests from: development
+
+Running tests for the development project using test runner: Polylith built-in clojure.test runner...
+Running tests from the development project, including 3 bricks: board, move, piece
+
+Testing tetrisanalyzer.board.core-test
+
+Ran 2 tests containing 2 assertions.
+0 failures, 0 errors.
+
+Test results: 2 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.board.clear-rows-test
+
+Ran 1 tests containing 1 assertions.
+0 failures, 0 errors.
+
+Test results: 1 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.board.grid-test
+
+Ran 2 tests containing 2 assertions.
+0 failures, 0 errors.
+
+Test results: 2 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.move.placement-test
+
+Ran 2 tests containing 2 assertions.
+0 failures, 0 errors.
+
+Test results: 2 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.move.move-test
+
+Ran 11 tests containing 11 assertions.
+0 failures, 0 errors.
+
+Test results: 11 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.move.visit-test
+
+Ran 2 tests containing 2 assertions.
+0 failures, 0 errors.
+
+Test results: 2 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.piece.shape-test
+
+Ran 1 tests containing 1 assertions.
+0 failures, 0 errors.
+
+Test results: 1 passes, 0 failures, 0 errors.
+
+Execution time: 0 seconds
+</code></pre><p>Python:</p><pre><code class="language-python">$&gt; cd ~/source/tetrisanalyzer/langs/python/tetris-polylith-uv
+$&gt; uv run pytest
+================================================================== test session starts ===================================================================
+platform darwin -- Python 3.13.11, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/tengstrand/source/tetrisanalyzer/langs/python/tetris-polylith-uv
+configfile: pyproject.toml
+collected 21 items
+
+test/components/tetrisanalyzer/board/test_clear_rows.py .                                                                                          [  4%]
+test/components/tetrisanalyzer/board/test_core.py ..                                                                                               [ 14%]
+test/components/tetrisanalyzer/board/test_grid.py ..                                                                                               [ 23%]
+test/components/tetrisanalyzer/move/test_move.py ...........                                                                                       [ 76%]
+test/components/tetrisanalyzer/move/test_placement.py ..                                                                                           [ 85%]
+test/components/tetrisanalyzer/move/test_visit.py ..                                                                                               [ 95%]
+test/components/tetrisanalyzer/piece/test_shape.py .                                                                                               [100%]
+
+=================================================================== 21 passed in 0.02s ===================================================================
+</code></pre><p>Det fungerar!</p><h2 id="sammanfattning">Sammanfattning</h2><p>I denna tredje del tog jag mig an den svåraste uppgiften hittills, att räkna ut alla giltiga flytt för en bit i sin startposition.</p><p>Jag undvek att implementera det som en rekursiv algoritm, då vi annars blir begränsade i hur stora bräden vi kan hantera.</p><p>Den nya koden behövde bo någonstans, men varken <code>piece</code> eller <code>board</code> kändes rätt, så istället tillkom den nya <code>move</code>-komponenten.</p><p>Vi passade även på att göra koden lättare att jobba med, genom att specificera bitarna på ett mer läsbart sätt, och med den ändringen kunde vi enkelt stödja tre olika varianter av Tetris.</p><p>Hoppas du hade lika kul som jag 😃</p><p>Happy coding!</p></div>]]></content>
   </entry>
   <entry>
     <id>https://tengstrand.github.io/blog/2026-01-11-tetris-playing-ai-the-polylith-way-2.html</id>
