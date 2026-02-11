@@ -26,9 +26,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="0.84096521"
-     inkscape:cx="341.27452"
-     inkscape:cy="436.99786"
+     inkscape:zoom="1.2674802"
+     inkscape:cx="404.74006"
+     inkscape:cy="254.44185"
      inkscape:window-width="1616"
      inkscape:window-height="1002"
      inkscape:window-x="0"
@@ -63,12 +63,15 @@
      id="layer1">
     <g
        id="g17"
-       transform="translate(-19.579167,-28.575002)">
+       transform="translate(24.73962,-61.745838)"
+       inkscape:export-filename="components.png"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96">
       <rect
          style="fill:#47b847;fill-opacity:1;stroke-width:0.758333"
          id="rect1"
          width="62.42054"
-         height="41.273987"
+         height="36.824612"
          x="43.111397"
          y="90.322403"
          ry="1.8412452" />
@@ -113,109 +116,57 @@
            style="font-size:3.29259px;fill:#ffffff;stroke-width:0.758333"
            x="49.108738"
            y="121.47733"
-           id="tspan7">- empty-board [width height]</tspan><tspan
-           sodipodi:role="line"
-           style="font-size:3.29259px;fill:#ffffff;stroke-width:0.758333"
-           x="49.108738"
-           y="125.59306"
-           id="tspan20">- set-piece [board p x y piece]</tspan></text>
+           id="tspan20">- empty-board [width height]</tspan></text>
     </g>
-    <g
-       id="g20"
-       transform="translate(0,1.5875)">
-      <g
-         id="g16"
-         transform="translate(69.320837,-66.675002)">
-        <rect
-           style="fill:#47b847;fill-opacity:1;stroke-width:0.758333"
-           id="rect1-1"
-           width="77.456284"
-           height="22.54571"
-           x="42.862495"
-           y="134.67296"
-           ry="1.8412452" />
-        <text
-           xml:space="preserve"
-           style="font-size:4.93889px;fill:#ffffff;fill-opacity:1;stroke-width:0.758333"
-           x="72.924423"
-           y="142.33334"
-           id="text1-0"><tspan
-             sodipodi:role="line"
-             id="tspan1-3"
-             style="font-size:4.93889px;fill:#ffffff;stroke-width:0.758333"
-             x="72.924423"
-             y="142.33334">move</tspan></text>
-        <text
-           xml:space="preserve"
-           style="font-size:3.29259px;fill:#ffffff;fill-opacity:1;stroke-width:0.758333"
-           x="48.859821"
-           y="149.36496"
-           id="text3-0"><tspan
-             sodipodi:role="line"
-             style="font-size:3.29259px;fill:#ffffff;stroke-width:0.758333"
-             x="48.859821"
-             y="149.36496"
-             id="tspan14">- placements [board p x kick? shapes]</tspan></text>
-      </g>
-    </g>
-    <g
-       id="g15"
-       transform="translate(27.516667,-56.620836)">
-      <rect
-         style="fill:#47b847;fill-opacity:1;stroke-width:0.758333"
-         id="rect7"
-         width="62.550865"
-         height="29.365904"
-         x="42.862495"
-         y="177.00633"
-         ry="1.8412452" />
-      <text
-         xml:space="preserve"
-         style="font-size:4.93889px;fill:#ffffff;fill-opacity:1;stroke-width:0.758333"
-         x="66.574417"
-         y="184.66672"
-         id="text8"><tspan
-           sodipodi:role="line"
-           id="tspan8"
-           style="font-size:4.93889px;fill:#ffffff;stroke-width:0.758333"
-           x="66.574417"
-           y="184.66672">piece</tspan></text>
-      <text
-         xml:space="preserve"
-         style="font-size:3.29259px;fill:#ffffff;fill-opacity:1;stroke-width:0.758333"
-         x="48.859821"
-         y="191.69833"
-         id="text11"><tspan
-           sodipodi:role="line"
-           id="tspan9"
-           style="font-size:3.29259px;fill:#ffffff;stroke-width:0.758333"
-           x="48.859821"
-           y="191.69833">- O, I, Z, S, J, L, T, X</tspan><tspan
-           sodipodi:role="line"
-           style="font-size:3.29259px;fill:#ffffff;stroke-width:0.758333"
-           x="48.859821"
-           y="195.81407"
-           id="tspan10">- piece [p rotation shape]</tspan><tspan
-           sodipodi:role="line"
-           style="font-size:3.29259px;fill:#ffffff;stroke-width:0.758333"
-           x="48.859821"
-           y="199.92981"
-           id="tspan11">- rotation-bitmask [shapes s]</tspan></text>
-    </g>
+    <rect
+       style="fill:#47b847;fill-opacity:1;stroke-width:0.758333"
+       id="rect7"
+       width="74.839523"
+       height="34.927635"
+       x="61.826923"
+       y="83.241158"
+       ry="1.8412452" />
+    <text
+       xml:space="preserve"
+       style="font-size:4.93889px;fill:#ffffff;fill-opacity:1;stroke-width:0.758333"
+       x="90.914742"
+       y="92.061417"
+       id="text8"><tspan
+         sodipodi:role="line"
+         id="tspan8"
+         style="font-size:4.93889px;fill:#ffffff;stroke-width:0.758333"
+         x="90.914742"
+         y="92.061417">piece</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.29259px;fill:#ffffff;fill-opacity:1;stroke-width:0.758333"
+       x="67.379311"
+       y="100.68047"
+       id="text11"><tspan
+         sodipodi:role="line"
+         id="tspan9"
+         style="font-size:3.29259px;fill:#ffffff;stroke-width:0.758333"
+         x="67.379311"
+         y="100.68047">- O, I, Z, S, J, L, T, X</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:3.29259px;fill:#ffffff;stroke-width:0.758333"
+         x="67.379311"
+         y="104.7962"
+         id="tspan10">- piece [p rotation shape]</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:3.29259px;fill:#ffffff;stroke-width:0.758333"
+         x="67.379311"
+         y="108.91194"
+         id="tspan11">- set-piece [board p x y piece]</tspan><tspan
+         sodipodi:role="line"
+         style="font-size:3.29259px;fill:#ffffff;stroke-width:0.758333"
+         x="67.379311"
+         y="113.02768"
+         id="tspan13">- placements [board p x kick? shapes]</tspan></text>
     <path
        style="fill:#ffffff;fill-opacity:1;stroke:#676767;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ConcaveTriangle)"
-       d="m 83.940859,115.24357 -8.494704,-9.75318"
+       d="M 98.606444,71.615121 V 81.672535"
        id="path19"
-       sodipodi:nodetypes="cc" />
-    <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#676767;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ConcaveTriangle)"
-       d="M 115.69087,115.24357 132.99488,96.366443"
-       id="path20"
-       sodipodi:nodetypes="cc" />
-    <path
-       style="fill:#ffffff;fill-opacity:1;stroke:#676767;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#ConcaveTriangle)"
-       d="m 91.692625,82.593702 18.247835,-6e-6"
-       id="path21"
        sodipodi:nodetypes="cc" />
   </g>
 </svg>
