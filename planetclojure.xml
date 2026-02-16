@@ -3,7 +3,7 @@
   <title>Tengstrand's Blog</title>
   <link href="https://tengstrand.github.io/blog/atom.xml" rel="self"/>
   <link href="https://tengstrand.github.io/blog/"/>
-  <updated>2026-02-16T06:57:45+00:00</updated>
+  <updated>2026-02-16T06:58:55+00:00</updated>
   <id>https://tengstrand.github.io/blog/</id>
   <author>
     <name>Joakim Tengstrand</name>
@@ -625,7 +625,7 @@ test/components/tetrisanalyzer/piece/move/test_visit.py ..                      
 test/components/tetrisanalyzer/piece/test_shape.py .                                                                                                                                                                         [100%]
 
 ======================================================================================================== 21 passed in 0.02s ========================================================================================================
-</code></pre><p>Nice, all tests passed!</p><h2 id="summary">Summary</h2><p>In this third part, I took on the not entirely trivial task of computing all valid moves for a piece in its starting position.</p><p>I avoided implementing it as a recursive algorithm, since that would limit how large our boards can get.</p><p>We reminded ourselves that code should live where we expect to find it, so we moved <code>set-piece</code>, along with the new code, into <code>piece</code>.</p><p>We also took the opportunity to make the code easier to work with, by specifying pieces in a more readable way, and with that change we could easily support three different Tetris variants.</p><p>Hope you had just as much fun as I did 😃</p><p>Happy Coding!</p></div>]]></content>
+</code></pre><p>Nice, all tests passed!</p><h2 id="summary">Summary</h2><p>In this third part, I took on the not entirely trivial task of computing all valid moves for a piece in its starting position.</p><p>I avoided implementing it as a recursive algorithm, since that would limit how large our boards can get.</p><p>We reminded ourselves that code should live where we expect to find it.</p><p>We also took the opportunity to make the code easier to work with, by specifying pieces in a more readable way, and with that change we could easily support three different Tetris variants.</p><p>Hope you had just as much fun as I did 😃</p><p>Happy Coding!</p></div>]]></content>
   </entry>
   <entry>
     <id>https://tengstrand.github.io/blog/2026-01-11-tetris-playing-ai-the-polylith-way-2.html</id>
