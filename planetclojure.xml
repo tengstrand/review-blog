@@ -3,26 +3,25 @@
   <title>Tengstrand's Blog</title>
   <link href="https://tengstrand.github.io/blog/atom.xml" rel="self"/>
   <link href="https://tengstrand.github.io/blog/"/>
-  <updated>2026-02-14T16:32:23+00:00</updated>
+  <updated>2026-02-16T06:52:36+00:00</updated>
   <id>https://tengstrand.github.io/blog/</id>
   <author>
     <name>Joakim Tengstrand</name>
   </author>
   <entry>
-    <id>https://tengstrand.github.io/blog/2026-02-11-tetris-playing-ai-the-polylith-way-3.html</id>
-    <link href="https://tengstrand.github.io/blog/2026-02-11-tetris-playing-ai-the-polylith-way-3.html"/>
+    <id>https://tengstrand.github.io/blog/2026-02-15-tetris-playing-ai-the-polylith-way-3.html</id>
+    <link href="https://tengstrand.github.io/blog/2026-02-15-tetris-playing-ai-the-polylith-way-3.html"/>
     <title>Tetris-playing AI the Polylith way - Part 3</title>
-    <updated>2026-02-11T23:59:59+00:00</updated>
-    <content type="html"><![CDATA[<div><img src="assets/07-tetris-playing-ai-the-polylith-way/rotations.png" alt="Tetris AI" style="width: 60%; max-width: 180px; height: auto; display: block; margin: 16px 0;"><p>I denna tredje del implementerar vi en algoritm som beräknar alla giltiga flytt för en piece (<a href="https://en.wikipedia.org/wiki/Tetromino">Tetromino</a>) i sin startposition. Vi skruvar lite på vår domänmodell och passar även på att förbättra läsbarheten för delar av koden som även fortsättningsvis skrivs i <a href="https://clojure.org/">Clojure</a> och <a href="https://www.python.org/">Python</a> tillsammans med den komponentbaserade arkitekturen <a href="https://polylith.gitbook.io/polylith/">Polylith</a>.</p><p>Tidigare delar:</p><ul><li><a href="05-tetris-playing-ai-the-polylith-way-1.html">Del 1</a> - Sätter en piece på en board. Visar skillnader mellan Clojure och Python och skapar komponenterna <code>piece</code> och <code>board</code>.</li><li><a href="05-tetris-playing-ai-the-polylith-way-1.html">Del 2</a> - Implementerar rensning av hela rader. Visar hur vi kan få snabb återkoppling genom att jobba REPL-drivet.</li></ul><!-- end-of-preview --><p>Här hittar du all kod för denna post:</p><ul><li><a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-03/langs/clojure/tetris-polylith">Clojure workspace</a></li><li><a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-03/langs/python/tetris-polylith-uv">Python workspace</a></li></ul><h2 id="tetris-varianter">Tetris-varianter</h2><p>Tetris har släppt i en rad olika varianter, så som den handhållna <a href="https://en.wikipedia.org/wiki/Game_Boy">Game Boy</a>, konsollen <a href="https://en.wikipedia.org/wiki/Tetris_(NES_video_game)">Nintento NES</a>, och <a href="https://archive.org/details/arcade_atetris">detta</a> arkadspel från Atari, som jag i mina unga dagar spelade ohälsosamt mycket på en numera nedlagd biljardhall!</p><p>Alla varianter uppför sig lite olika vad gäller vilka färger bitarna har, var de startar och hur de roterar, med mera.</p><p>I de flesta varianter av Tetris startar bitarna i följande rotationslägen (liggande) innan de börjar falla:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/pieces.png" alt="Tetris pieces" style="width: 70%; max-width: 3000px; height: auto; display: block; margin: 16px 0;"><p>Var på brädet bitarna startar varierar också mellan de olika varianterna av Tetris. Till exempel så startar bitarna i femte x-position i Nintendo NES och Atari Arcade, medan de startar i fjärde x-position i Game Boy:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/start-position.png" alt="Start position" style="width: 60%; max-width: 150px; height: auto; display: block; margin: 16px 0;"><p>I dessa äldre varianter av Tetris roterar bitarna endast moturs, till skillnad mot vissa nyare spel där man kan rotera både med- och moturs.</p><p>Här jämför vi hur bitarna roterar för de tre nämnda varianterna av Tetris:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/rotation-table.png" alt="Rotation table" style="width: 100%; max-width: 250px; height: auto; display: block; margin: 16px 0;"><p>För Atari är bitarna orienterade mot övre vänstra hörnet (undantaget stående I), medan de mestadels roterar runt sitt centrum i de andra två varianterna.</p><p>I vår kod reprecenterar vi en piece genom att ange fyra [x y] celler:</p><pre><code class="language-clojure">[[0 1] [1 1] [2 1] [1 2]]
-</code></pre><p>Denna representation är enkel för koden att hantera, men kommunicerar dåligt för en människa vilken form en piece har.</p><p>Grundregeln är att kod ska skrivas så att den blir enkel att förstå för de som läser och ändrar den (människor och på senare tid även AI-Agenter).</p><p>Låt oss därför definiera en piece så här istället:</p><pre><code class="language-clojure">(def T0 [&apos;---
+    <updated>2026-02-15T23:59:59+00:00</updated>
+    <content type="html"><![CDATA[<div><img src="assets/07-tetris-playing-ai-the-polylith-way/rotations.png" alt="Tetris AI" style="width: 60%; max-width: 180px; height: auto; display: block; margin: 16px 0;"><p>The focus in this third part of the blog series is to implement an algorithm that computes all valid moves for a piece (<a href="https://en.wikipedia.org/wiki/Tetromino">Tetromino</a>) in its starting position. We are refining our domain model and improving the readability of parts of the codebase, while continuing to implement the code in <a href="https://clojure.org/">Clojure</a> and <a href="https://www.python.org/">Python</a>  using the component-based <a href="https://polylith.gitbook.io/polylith/">Polylith</a> architecture.</p><p>Earlier parts:</p><ul><li><a href="05-tetris-playing-ai-the-polylith-way-1.html">Part 1</a> - Places a piece on a board. Shows the differences between Clojure and Python and creates the <code>piece</code> and <code>board</code> components.</li><li><a href="06-tetris-playing-ai-the-polylith-way-2.html">Part 2</a> - Implements clearing of completed rows. Shows how to get fast feedback when working REPL-driven.</li></ul><!-- end-of-preview --><p>The resulting source code from this post:</p><ul><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-03/langs/clojure/tetris-polylith">Clojure workspace</a></li><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-03/langs/python/tetris-polylith-uv">Python workspace</a></li></ul><h2 id="tetris-variants">Tetris Variants</h2><p>Tetris has been made in several different variants, such as the handheld <a href="https://en.wikipedia.org/wiki/Game_Boy">Game Boy</a>, the <a href="https://en.wikipedia.org/wiki/Tetris_(NES_video_game)">Nintendo NES</a> console, and <a href="https://archive.org/details/arcade_atetris">this</a> Atari arcade game, which I played an unhealthy amount of in my younger days at a pool hall that no longer exists!</p><p>Each variant behaves slightly differently when it comes to colours, starting positions, rotation behaviour, and so on.</p><p>In most Tetris variants, the pieces start in these rotation states (lying flat) before they start falling:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/pieces.png" alt="Tetris pieces" style="width: 70%; max-width: 3000px; height: auto; display: block; margin: 16px 0;"><p>Where on the board the pieces start also varies. For instance, on Nintendo NES and Atari Arcade they start in the fifth x-position, while on Game Boy they start in the fourth:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/start-position.png" alt="Start position" style="width: 60%; max-width: 150px; height: auto; display: block; margin: 16px 0;"><p>In these older versions of Tetris, the pieces rotate only counterclockwise, unlike in some newer games where you can rotate both clockwise and counterclockwise.</p><p>The following table compares how pieces rotate across the three mentioned variants:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/rotation-table.png" alt="Rotation table" style="width: 100%; max-width: 250px; height: auto; display: block; margin: 16px 0;"><p>In Atari, pieces are oriented toward the top-left corner (except the vertical I), while in the other two they mostly rotate around their centre.</p><p>In our code, we represent a piece as four [x y] cells:</p><pre><code class="language-clojure">[[0 1] [1 1] [2 1] [1 2]]
+</code></pre><p>This representation is easy for the code to work with, but poorly communicates the shape of a piece to a human.</p><p>The main rule is that code should be written to be easy to understand for the people who read and change it (humans and AI agents).</p><p>Let us therefore define a piece like this instead:</p><pre><code class="language-clojure">(def T0 [&apos;---
          &apos;xxx
          &apos;-x-])
 </code></pre><p>Python:</p><pre><code class="language-python">T0 = [
     &quot;---&quot;,
     &quot;xxx&quot;,
-    &quot;-x-&quot;,
-]
-</code></pre><p>Nu kan vi definiera alla sju pieces och deras rotationslägen för Game Boy (<a href="https://github.com/tengstrand/tetrisanalyzer/blob/tetris-part3/langs/python/tetris-polylith-uv/components/tetrisanalyzer/piece/settings/game_boy.py">Python-koden</a> är nästan identisk):</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.settings.game-boy
+    &quot;-x-&quot;]
+</code></pre><p>Now we can define all seven pieces and their rotation states for Game Boy (<a href="https://github.com/tengstrand/tetrisanalyzer/blob/tetris-part3/langs/python/tetris-polylith-uv/components/tetrisanalyzer/piece/settings/game_boy.py">Python code</a> is almost identical):</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.settings.game-boy
   (:require [tetrisanalyzer.piece.shape :as shape]))
 
 
@@ -114,7 +113,7 @@
              [T0 T1 T2 T3]])
 
 (def shapes (shape/shapes pieces))
-</code></pre><p>Den avslutande <a href="https://github.com/tengstrand/tetrisanalyzer/blob/26685d9ed598917105c0095ee991b1d139af37c8/langs/clojure/tetris-polylith/components/piece/src/tetrisanalyzer/piece/shape.clj#L15">shapes</a> funktionen omvandlar bitarna till det format koden använder:</p><pre><code class="language-clojure">[;; O
+</code></pre><p>The <a href="https://github.com/tengstrand/tetrisanalyzer/blob/26685d9ed598917105c0095ee991b1d139af37c8/langs/clojure/tetris-polylith/components/piece/src/tetrisanalyzer/piece/shape.clj#L15">shapes</a> function at the end converts the pieces into the format the code uses:</p><pre><code class="language-clojure">[;; O
  [[[1 1] [2 1] [1 2] [2 2]]]
  ;; I
  [[[0 2] [1 2] [2 2] [3 2]]
@@ -140,7 +139,7 @@
   [[1 0] [1 1] [2 1] [1 2]]
   [[1 0] [0 1] [1 1] [2 1]]
   [[1 0] [0 1] [1 1] [1 2]]]]
-</code></pre><p>Så här ser testet för <code>shape</code>-funktionen ut:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.shape-test
+</code></pre><p>The test for the <code>shape</code> function looks like this:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.shape-test
   (:require [clojure.test :refer :all]
             [tetrisanalyzer.piece.shape :as shape]))
 
@@ -165,7 +164,7 @@ def test_converts_a_piece_shape_grid_to_a_list_of_xy_cells():
                               &quot;-x--&quot;,
                               &quot;----&quot;]
     )
-</code></pre><p>Implementation i Clojure:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.shape)
+</code></pre><p>Implementation in Clojure:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.shape)
 
 (defn cell [x character y]
   (when (= \x character)
@@ -182,21 +181,21 @@ def test_converts_a_piece_shape_grid_to_a_list_of_xy_cells():
 (defn shapes [piece-grids]
   (mapv #(mapv shape %)
         piece-grids))
-</code></pre><p>Om du är ovan med Clojure, kommer här förklarande exempel till ett par av funktionerna:</p><pre><code class="language-clojure">(map-indexed vector [&quot;I&quot; &quot;love&quot; &quot;Tetris&quot;])
+</code></pre><p>If you are new to Clojure, here are some explanatory examples of a couple of the functions:</p><pre><code class="language-clojure">(map-indexed vector [&quot;I&quot; &quot;love&quot; &quot;Tetris&quot;])
 
 ;; ([0 &quot;I&quot;] [1 &quot;love&quot;] [2 &quot;Tetris&quot;])
-</code></pre><p>Funktionen <a href="https://clojuredocs.org/clojure.core/map-indexed">map-indexed</a> itererar över elementen &quot;I&quot;, &quot;love&quot;, och &quot;Tetris&quot;, och bygger upp en ny lista där varje elment skapas genom anrop till funktionen <a href="https://clojuredocs.org/clojure.core/vector">vector</a> med indexet som räknas upp, vilket motsvarar:</p><pre><code class="language-clojure">(list (vector 0 &quot;I&quot;)
+</code></pre><p>The <a href="https://clojuredocs.org/clojure.core/map-indexed">map-indexed</a> function iterates over &quot;I&quot;, &quot;love&quot;, and &quot;Tetris&quot;, and builds a new list where each element is created by calling <a href="https://clojuredocs.org/clojure.core/vector">vector</a> with the index, which is equivalent to:</p><pre><code class="language-clojure">(list (vector 0 &quot;I&quot;)
       (vector 1 &quot;love&quot;)
       (vector 2 &quot;tetris&quot;))
 
 ;; ([0 &quot;I&quot;] [1 &quot;love&quot;] [2 &quot;Tetris&quot;])
-</code></pre><p>Funktionen <a href="https://clojuredocs.org/clojure.core/keep-indexed">keep-indexed</a> fungerar på samma sätt, men tar bara med värden som ej är <code>nil</code>, därav användningen av <a href="https://clojuredocs.org/clojure.core/when">when</a>:</p><pre><code class="language-clojure">;; %1 = first argument (index)
+</code></pre><p>The function <a href="https://clojuredocs.org/clojure.core/keep-indexed">keep-indexed</a> works in the same way, but only keeps values that aren&apos;t nil, hence the use of <a href="https://clojuredocs.org/clojure.core/when">when</a>:</p><pre><code class="language-clojure">;; %1 = first argument (index)
 ;; %2 = second argument (value)
 (keep-indexed #(when %2 [%1 %2]) 
               [&quot;I&quot; nil &quot;Tetris&quot;])
 
 ;; ([0 &quot;I&quot;] [2 &quot;Tetris&quot;])
-</code></pre><p>Implementation i Python:</p><pre><code class="language-python">def shape(piece_grid):
+</code></pre><p>Implementation in Python:</p><pre><code class="language-python">def shape(piece_grid):
     return [
         [x, y]
         for y, row in enumerate(piece_grid)
@@ -207,7 +206,7 @@ def shapes(pieces_grids):
     return [
         [shape(piece_grid) for piece_grid in piece_grids]
         for piece_grids in pieces_grids]
-</code></pre><p>Här använder vi <a href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions">list comprehension</a> för att konvertera till [x, y] celler. Funktionen <a href="https://docs.python.org/3/library/functions.html#enumerate">enumerate</a> har samma funktion som <a href="https://clojuredocs.org/clojure.core/map-indexed">map-indexed</a> i Clojure, att lägga till ett index (0, 1, 2, ...) för varje element.</p><h2 id="domänmodellering">Domänmodellering</h2><p>Den nya koden som beräknar giltiga flytt av en piece i sin startposition, behöver ligga någonstans. Vi behöver kunna flytta och rotera en <code>piece</code>, och testa om platsen är ledig på en <code>board</code>.</p><p>Inom objektorientering har vi flera alternativ. Vi kan t.ex. skriva <code>piece.set(board)</code>, <code>board.set(piece)</code> eller kanske <code>move.set(piece, board)</code>, samtidigt som vi gör allt vi kan för att inte avslöja vår inre representation.</p><p>Inom funktionell progammering är vi friare, och försöker inte dölja hur vi representerar vårt data. Att board lagras som en tvådimensionell vektor är ingen hemlighet, och det är inte bara <code>board</code> som har tillåtelse att skapa uppdaterade kopior av denna datastruktur.</p><p>Kod ligger oftast bäst där vi förväntas hitta den. Vi har funktionen <code>set-piece</code> som enligt detta resonemang borde ligga i <code>piece</code>, så jag flyttar den från <code>board</code> där jag tidigare lagt den. Även den nya funktionen <code>placements</code> får bo i <code>piece</code>, då den handlar om att hitta giltiga flytt för en piece. Vår domän ser nu ut så här:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/components.png?v=3" alt="Components" style="width: 80%; max-width: 200px; height: auto; display: block; margin: 16px 0;"><p>Inom varje komponent listar vi vad som ingår i dess interface (vad som är publikt) medan pilen visar att <code>piece</code> anropar funktioner i <code>board</code>.</p><p>Implementationen delar vi upp i namespacen <code>move</code>, <code>placement</code>, och <code>visit</code>, som vi lägger i paketet <code>move</code>:</p><pre><code class="language-shell">▾ tetris-polylith
+</code></pre><p>Here we use <a href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions">list comprehension</a> to convert the data into [x, y] cells. The <a href="https://docs.python.org/3/library/functions.html#enumerate">enumerate</a> function is equivalent to Clojure’s <a href="https://clojuredocs.org/clojure.core/map-indexed">map-indexed</a>, in that it adds an index (0, 1, 2, …) to each element.</p><h2 id="domain-modelling">Domain Modelling</h2><p>The new code that calculates the valid moves for a piece in its starting position has to live somewhere. We need to be able to move and rotate a <code>piece</code>, and check whether the target position on the <code>board</code> is free.</p><p>In object-oriented programming we have several options. We could write <code>piece.set(board)</code>, <code>board.set(piece)</code>, or maybe <code>move.set(piece, board)</code>, while making every effort not to expose the internal representation.</p><p>In functional programming, we have more freedom and don&apos;t try to hide how we represent our data. The fact that the board is stored as a two-dimensional vector is no secret, and it isn’t just board that can create updated copies of this two-dimensional vector.</p><p>Code usually belongs where we expect to find it. We have the function <code>set-piece</code>, which, according to this reasoning, should live in <code>piece</code>, so I moved it from <code>board</code> where I&apos;d put it earlier. The new <code>placements</code> function also goes in <code>piece</code>, since it&apos;s about finding valid moves for a piece. Our domain model now looks like this:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/components.png?v=3" alt="Components" style="width: 80%; max-width: 200px; height: auto; display: block; margin: 16px 0;"><p>Inside each component we list what belongs to its interface (what&apos;s public), and the arrow shows that <code>piece</code> calls functions in <code>board</code>.</p><p>We split the implementation across the namespaces <code>move</code>, <code>placement</code>, and <code>visit</code>, which we put in the <code>move</code> package:</p><pre><code class="language-shell">▾ tetris-polylith
   ▸ bases
   ▾ components
     ▸ board
@@ -218,10 +217,10 @@ def shapes(pieces_grids):
           move.clj
           placement.clj
           visit.clj
-        bitmask
+        bitmask.clj
         interface.clj
-        piece
-        shape
+        piece.clj
+        shape.clj
       ▾ test
         ▾ move
           move_test.clj
@@ -231,7 +230,7 @@ def shapes(pieces_grids):
         shape_test.clj
   ▸ development
   ▸ projects
-</code></pre><p>Så här ser <code>move-test</code> ut:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.move-test
+</code></pre><p>The <code>move-test</code> looks like this:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.move-test
   (:require [clojure.test :refer :all]
             [tetrisanalyzer.piece.piece :as piece]
             [tetrisanalyzer.piece.move.move :as move]
@@ -295,13 +294,13 @@ def shapes(pieces_grids):
 (deftest invalid-move-outside-board
   (is (= false
          (move/valid-move? board 10 -10 S rotation shapes))))
-</code></pre><p>Det första testet <code>valid-move</code> validerar att S-biten:</p><pre><code class="language-clojure">[&apos;-xx
+</code></pre><p>The first test, <code>valid-move</code>, checks that the S piece:</p><pre><code class="language-clojure">[&apos;-xx
  &apos;xx-]
-</code></pre><p>Kan placers på position x=2, y=1, på brädet:</p><pre><code class="language-clojure">[&apos;xxxxxxxx
+</code></pre><p>Can be placed at position x=2, y=1, on the board:</p><pre><code class="language-clojure">[&apos;xxxxxxxx
  &apos;xxx--xxx
  &apos;xx--xxxx
  &apos;xxxxxxxx]
-</code></pre><p>Utöver det, testas olika varianter av giltiga flytt och rotation in till det tomma området, samt ogiltiga flytt utanför området.</p><p>I Tetris finns det något som kallas kick, eller <a href="https://harddrop.com/wiki/Wall_kick">wall kick</a>. När man roterar en bit och positionen är upptagen på brädet, kommer även x-1 att testas (ett steg till vänster). På <a href="https://sv.wikipedia.org/wiki/Nintendo_Entertainment_System">Nintendo NES</a> är detta avslaget, medan den är aktiverad på de övriga två varianterna vi stödjer här. På nyare Tetris testas ibland även andra placeringar än x-1.</p><p>Implementationen ser ut så här:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.move
+</code></pre><p>Beyond that, we test various valid moves and rotations into the empty area, plus invalid moves outside the board.</p><p>In Tetris there&apos;s something called kick, or <a href="https://harddrop.com/wiki/Wall_kick">wall kick</a>. When you rotate a piece and that position is occupied on the board, one step left is also tried (x-1). On <a href="https://en.wikipedia.org/wiki/Nintendo_Entertainment_System">Nintendo NES</a> this is turned off, while it&apos;s enabled in the other two variants we support here. In newer Tetris games, other placements besides x-1 are sometimes tested as well.</p><p>The implementation looks like this:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.move
   (:require [tetrisanalyzer.piece.piece :as piece]))
 
 (defn cell [board x y [cx cy]]
@@ -343,7 +342,7 @@ def shapes(pieces_grids):
   (if rotation-kick?
     rotate-with-kick
     rotate))
-</code></pre><p>Funktionerna är ganska enkla som synes, så låt oss istället titta på koden som hjälper oss att hålla reda på vilka flytt som redan besökts:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.visit)
+</code></pre><p>The functions are fairly straightforward, so let us instead look at the code that helps us keep track of which moves have already been visited:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.visit)
 
 (defn visited? [visited-moves x y rotation]
   (if-let [visited-rotations (get-in visited-moves [y x])]
@@ -354,7 +353,7 @@ def shapes(pieces_grids):
 (defn visit [visited-moves x y rotation]
   (assoc-in visited-moves [y x] (bit-or (get-in visited-moves [y x])
                                         (bit-shift-left 1 rotation))))
-</code></pre><p>Anropet till standardfunktionen <a href="https://clojuredocs.org/clojure.core/bit-shift-left">bit-shift-left</a> returnerar en satt bit i någon av de fyra lägsta bitarna:</p><table><thead><tr><th style="text-align:center;">rotation</th><th style="text-align:center;">bit</th></tr></thead><tbody><tr><td style="text-align:center;">0</td><td style="text-align:center;"><code>0001</code></td></tr><tr><td style="text-align:center;">1</td><td style="text-align:center;"><code>0010</code></td></tr><tr><td style="text-align:center;">2</td><td style="text-align:center;"><code>0100</code></td></tr><tr><td style="text-align:center;">3</td><td style="text-align:center;"><code>1000</code></td></tr></tbody></table><p>Dessa &quot;flaggor&quot; används sedan för att markera att vi besökt ett visst [x y rotation] flytt på ett bräde. Notera att vi skickar in ett &quot;besöks-bräde&quot; (visited-moves) till <code>visited</code> och får tillbaka en kopia där [x y]-cellen har en bit satt för angiven rotation. Denna &quot;kopiering&quot; är dock väldigt snabb och minneseffektiv, se &quot;structural sharing&quot; under <a href="https://clojure.org/reference/data_structures">Data Structures</a>.</p><p>Testerna ser ut så här:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.visit-test
+</code></pre><p>Calling the standard <a href="https://clojuredocs.org/clojure.core/bit-shift-left">bit-shift-left</a> function returns a set bit in one of the four lowest bits:</p><table><thead><tr><th style="text-align:center;">rotation</th><th style="text-align:center;">bit</th></tr></thead><tbody><tr><td style="text-align:center;">0</td><td style="text-align:center;"><code>0001</code></td></tr><tr><td style="text-align:center;">1</td><td style="text-align:center;"><code>0010</code></td></tr><tr><td style="text-align:center;">2</td><td style="text-align:center;"><code>0100</code></td></tr><tr><td style="text-align:center;">3</td><td style="text-align:center;"><code>1000</code></td></tr></tbody></table><p>These &quot;flags&quot; are used to mark that we&apos;ve visited a given [x y rotation] move on the board. Note that we pass a &quot;visited board&quot; (<code>visited-moves</code>) into <code>visit</code> and get back a copy where the [x y] cell has a bit set for the given rotation. This “copying” is very fast and memory-efficient, see “structural sharing” under <a href="https://clojure.org/reference/data_structures">Data Structures</a>.</p><p>The tests look like the following:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.visit-test
   (:require [clojure.test :refer :all]
             [tetrisanalyzer.piece.move.visit :as visit]))
 
@@ -379,8 +378,7 @@ Y = 1
 ROTATION = 3
 UNVISITED = [
     [0, 0, 0, 0],
-    [0, 0, 0, 0],
-]
+    [0, 0, 0, 0]]
 
 
 def test_move_is_not_visited():
@@ -391,7 +389,7 @@ def test_move_is_visited():
     visited = [row[:] for row in UNVISITED]
     visit(visited, X, Y, ROTATION)
     assert is_visited(visited, X, Y, ROTATION) is True
-</code></pre><p>Nu har vi bäddat för att kunna implementera funktionen <code>placements</code> som räknar ut alla giltiga flytt för en piece i sin startposition.</p><p>Vi börjar med testet:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.placement-test
+</code></pre><p>We have now laid the groundwork to implement the <code>placements</code> function that computes all valid moves for a piece in its starting position.</p><p>We start with the test:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.placement-test
   (:require [clojure.test :refer :all]
             [tetrisanalyzer.piece.piece :as piece]
             [tetrisanalyzer.piece.move.placement :as placement]
@@ -428,7 +426,7 @@ def test_move_is_visited():
           [3 0 0]
           [0 1 1]]
          (sort-by sorter (placement/placements board piece/J start-x true shapes)))))
-</code></pre><p>Detta testar att vi får tillbaka de giltiga [x y rotation]-positioner som en piece kan placeras på ett bräde utifrån sin startposition.</p><p>Implementationen:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.placement
+</code></pre><p>This tests that we get back the valid [x y rotation] positions where a piece can be placed on the board from its starting position.</p><p>The implementation:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.placement
   (:require [tetrisanalyzer.piece.move.move :as move]
             [tetrisanalyzer.piece.move.visit :as visit]
             [tetrisanalyzer.board.interface :as board]
@@ -464,30 +462,30 @@ def test_move_is_visited():
     (if (move/valid-move? board x y p rotation shapes)
       (-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)
       [])))
-</code></pre><p>Vi börjar med att förklara följande sektion i <code>-&gt;placements</code>:</p><pre><code class="language-clojure">(loop [next-moves (list [x y rotation])
+</code></pre><p>Let us walk through the following section in <code>-&gt;placements</code>:</p><pre><code class="language-clojure">(loop [next-moves (list [x y rotation])
        placements []
        valid-moves valid-moves
        visited-moves visited-moves]
-</code></pre><p>Dessa fyra rader initierar det data vi vill loopa på, där <code>next-moves</code> är den lista med moves vi behöver gå igenom och som växer och betas av löpande, och där <code>placements</code> ackumulerar giltiga flytt.</p><p>Då Clojure ej stödjer <a href="https://en.wikipedia.org/wiki/Tail_call">tail-recursion</a>, finns istället <a href="https://clojuredocs.org/clojure.core/loop">loop</a> att tillgå som alternativ till en rekursiv lösning, vilket vi vill undvika för att inte få problem med stack overflow om vi skulle använda bräden större än 10x20.</p><pre><code class="language-clojure">(if-let [[x y rotation] (first next-moves)]
-</code></pre><p>Hämtar nästa move från <code>next-moves</code> och fortsätter med koden direkt under, eller returnerar <code>placements</code> (sista raden i funktionen) om <code>next-moves</code> är tom, vilket är alla giltiga flytt.</p><pre><code class="language-clojure">(let [next-moves (rest next-moves)]
-</code></pre><p>Drop:ar första elementet i <code>next-moves</code>, som vi precis har plockat ut.</p><pre><code class="language-clojure">(if (visit/visited? visited-moves x y rotation)
-</code></pre><p>Om flyttet redan besökts, fortsätt med:</p><pre><code class="language-clojure">(recur next-moves placements valid-moves visited-moves)
-</code></pre><p>Som fortsätter vår sökning efter giltiga flytt (raden efter <code>(loop [...]</code>), genom att gå till nästa flytt att utvärdera.</p><p>Annars, om flyttet ej har besökts, fortsätt med:</p><pre><code class="language-clojure">(let [[down placement] (move/down board x y p rotation bitmask shapes)
+</code></pre><p>These four lines initialise the data we&apos;re looping over: <code>next-moves</code> is the list of moves we need to process (it grows and shrinks as we go), and <code>placements</code> accumulates valid moves.</p><p>Since Clojure doesn’t support <a href="https://en.wikipedia.org/wiki/Tail_call">tail recursion</a>, we use <a href="https://clojuredocs.org/clojure.core/loop">loop</a> instead, to avoid stack overflow on boards larger than 10×20.</p><pre><code class="language-clojure">(if-let [[x y rotation] (first next-moves)]
+</code></pre><p>Retrieves the next move from <code>next-moves</code> and continues with the code immediately after, or returns <code>placements</code> (the last line in the function, representing all valid moves) if <code>next-moves</code> is empty.</p><pre><code class="language-clojure">(let [next-moves (rest next-moves)]
+</code></pre><p>Drops the first element from <code>next-moves</code>, the one we just picked.</p><pre><code class="language-clojure">(if (visit/visited? visited-moves x y rotation)
+</code></pre><p>If we&apos;ve already visited this move, continue with:</p><pre><code class="language-clojure">(recur next-moves placements valid-moves visited-moves)
+</code></pre><p>Which continues our search for valid moves (the line after <code>(loop [...]</code>) by moving on to the next move to evaluate.</p><p>Otherwise, if the move hasn&apos;t been visited, we do:</p><pre><code class="language-clojure">(let [[down placement] (move/down board x y p rotation bitmask shapes)
      ...]
-</code></pre><p>Sätter <code>down</code> till nästa nedåtflytt (om ledigt) eller <code>placement</code> om det ej gick att flytta nedåt, vilket händer när vi nått botten eller om någon del av &quot;bygget&quot; är i vägen.</p><p>För dessa rader:</p><pre><code class="language-clojure">(keep #(% board x y p rotation bitmask shapes)
+</code></pre><p>This sets <code>down</code> to the next downward move (if free) or <code>placement</code> if we can&apos;t move down, which happens when we hit the bottom or when part of the &quot;stack&quot; is in the way.</p><p>For these lines:</p><pre><code class="language-clojure">(keep #(% board x y p rotation bitmask shapes)
       [move/left
        move/right
        rotation-fn
        (constantly down)])
-</code></pre><p>Kommer %-tecknet ersättas med funktionerna i vektorn, vilket motsvarar:</p><pre><code class="language-clojure">[(move/left board x y p rotation bitmask shapes)
+</code></pre><p>The <code>%</code> gets replaced with each function in the vector, which is equivalent to:</p><pre><code class="language-clojure">[(move/left board x y p rotation bitmask shapes)
  (move/right board x y p rotation bitmask shapes)
  (rotation-fn board x y p rotation bitmask shapes)
  (down board x y p rotation bitmask shapes)]
-</code></pre><p>Dessa funktionsanrop kommer att utföra alla möjliga flytt, inklusive en rotation, som alla returnerar [x y rotation] om positionen var ledig på brädet, eller <code>nil</code> om upptagen. Funktionen <a href="https://clojuredocs.org/clojure.core/keep">keep</a> filtrerar bort <code>nil</code>-värden, vilket är alla giltiga flytt som sedan tilldelas <code>moves</code>.</p><p>Till slut körs:</p><pre><code class="language-clojure">(recur (into next-moves moves)
+</code></pre><p>These function calls generate all possible moves (including rotations), returning [x y rotation] for positions that are free on the board, or nil if occupied. The <a href="https://clojuredocs.org/clojure.core/keep">keep</a> function filters out <code>nil</code> values, leaving only valid moves in <code>moves</code>.</p><p>Finally we execute:</p><pre><code class="language-clojure">(recur (into next-moves moves)
        (concat placements placement)
        (conj valid-moves [x y rotation])
        (visit/visit visited-moves x y rotation))
-</code></pre><p>Vilket anropar <code>loop</code> igen med:</p><ul><li><code>next-moves</code> med de eventuellt nya <code>moves</code> tillagda</li><li><code>placements</code> med det eventuellt giltiga flyttet tillagt</li><li><code>valid-moves</code> med aktuellt move tillagt</li><li><code>visited-moves</code> där aktuellt move är markerat som besökt</li></ul><p>Detta snurrar på, tills <code>next-moves</code> är tom, och då returneras <code>placements</code>.</p><p>Funktionen som kickar igång allt, och returnerar giltiga flytt för en piece i sin startposition:</p><pre><code class="language-clojure">(defn placements [board p x kick? shapes]
+</code></pre><p>Which calls <code>loop</code> again with:</p><ul><li><code>next-moves</code> updated with any new moves</li><li><code>placements</code> updated with any valid placement</li><li><code>valid-moves</code> updated with the current move</li><li><code>visited-moves</code> with the current move marked as visited</li></ul><p>This keeps going until <code>next-moves</code> is empty, and then we return <code>placements</code>.</p><p>The function that kicks everything off and returns valid moves for a piece in its starting position:</p><pre><code class="language-clojure">(defn placements [board p x kick? shapes]
   (let [y 0
         rotation 0
         bitmask (bitmask/rotation-bitmask shapes p)
@@ -496,7 +494,7 @@ def test_move_is_visited():
     (if (move/valid-move? board x y p rotation shapes)
       (-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)
       [])))
-</code></pre><ul><li><code>board</code>: en tvådimensionell vektor som representerar en board, oftast 10x20.</li><li><code>p</code>: piece index (0, 1, 2, 3, 4, 5, eller 6).</li><li><code>x</code>: vilken kolumn 4x4-griden startar (där biten finns). Första kolumnen är 0.</li><li><code>y</code>: satt till 0 (översta raden) och anger startrad för 4x4-griden.</li><li><code>rotation</code> satt till 0 (start-rotation).</li><li><code>bitmask</code>: används vid uppräkning av <code>rotation</code> så att den börjar om på 0 när nått slutet på det antal rotationer den kan göra.</li><li><code>visited-moves</code>: har samma struktur som en board, d.v.s en tvådimensionell array av vektorer, oftast 10x20.</li><li><code>rotation-fn</code>: returnerar rätt rotationsfunktion beroende på om kick är aktivt eller ej. Testar även position x-1 om kick? är true.</li><li><code>shapes</code>: formerna för alla pieces och dess rotationslägen, lagrade som [x y] celler.</li><li><code>(if (move/valid-move? board x y p rotation shapes)</code>: vi måste testa ifall den initiala positionen är ledig eller ej, och returnera en tom lista (vektor) om ej ledig.</li><li><code>(-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)</code> beräknar de giltiga flytten.</li></ul><p>Implementation i Python:</p><pre><code class="language-python">from collections import deque
+</code></pre><ul><li><code>board</code>: a two-dimensional vector representing the board, usually 10x20.</li><li><code>p</code>: piece index (0, 1, 2, 3, 4, 5, or 6).</li><li><code>x</code>: which column the 4x4 grid starts in (where the piece sits). First column is 0.</li><li><code>y</code>: set to 0 (top row for the 4x4 grid).</li><li><code>rotation</code>: set to 0 (starting rotation).</li><li><code>bitmask</code>: used when iterating over rotations so that it wraps back to 0 after reaching the maximum number of rotations it can perform.</li><li><code>visited-moves</code>: has the same structure as a board, a two-dimensional array, usually 10x20.</li><li><code>rotation-fn</code>: returns the right rotation function depending on whether kick is enabled. Also tries position x-1 if <code>kick?</code> is true.</li><li><code>shapes</code>: the shapes for all pieces and their rotation states, stored as [x y] cells.</li><li><code>(if (move/valid-move? board x y p rotation shapes)</code>: we need to check whether the initial position is free; if not, return an empty vector.</li><li><code>(-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)</code> computes the valid moves.</li></ul><p>Implementation in Python:</p><pre><code class="language-python">from collections import deque
 
 from tetrisanalyzer import board as board_ifc
 from tetrisanalyzer.piece import piece
@@ -520,8 +518,8 @@ def _placements(board, x, y, p, rotation, bitmask, valid_moves, visited_moves, r
             move.left(board, x, y, p, rotation, bitmask, shapes),
             move.right(board, x, y, p, rotation, bitmask, shapes),
             rotation_move_fn(board, x, y, p, rotation, bitmask, shapes),
-            down_move,
-        ]
+            down_move]
+
         moves = [m for m in moves if m is not None]
 
         next_moves.extend(moves)
@@ -546,7 +544,7 @@ def placements(board, p, start_x, kick, shapes):
         return []
 
     return _placements(board, start_x, y, p, rotation, bitmask, [], visited_moves, rotation_move_fn, shapes)
-</code></pre><p>Koden följer samma algoritm som i Clojure. Funktionen <a href="https://docs.python.org/3/library/collections.html#collections.deque">deque</a> använder vi då den är lite snabbare än en lista, då vi både gör <code>popleft</code> och <code>extend</code>.</p><h2 id="testning">Testning</h2><p>Avslutningsvis kör vi våra tester:</p><pre><code class="language-clojure">$&gt; cd ~/source/tetrisanalyzer/langs/clojure/tetris-polylith
+</code></pre><p>The code follows the same algorithm as in Clojure. We use <a href="https://docs.python.org/3/library/collections.html#collections.deque">deque</a> because it&apos;s slightly faster than a list when performing both <code>popleft</code> and <code>extend</code>.</p><h2 id="testing">Testing</h2><p>Finally, we run our tests:</p><pre><code class="language-clojure">$&gt; cd ~/source/tetrisanalyzer/langs/clojure/tetris-polylith
 $&gt; poly test :dev
 Projects to run tests from: development
 
@@ -627,7 +625,7 @@ test/components/tetrisanalyzer/piece/move/test_visit.py ..                      
 test/components/tetrisanalyzer/piece/test_shape.py .                                                                                                                                                                         [100%]
 
 ======================================================================================================== 21 passed in 0.02s ========================================================================================================
-</code></pre><p>Vad bra, alla tester gick igenom!</p><h2 id="sammanfattning">Sammanfattning</h2><p>I denna tredje del tog jag mig an den inte helt lätta uppgiften att räkna ut alla giltiga flytt för en bit i sin startposition.</p><p>Jag undvek att implementera det som en rekursiv algoritm, då vi annars blir begränsade i hur stora bräden vi kan hantera.</p><p>Den nya koden fick bo i <code>piece</code> då konceptet kretsade runt densamma.</p><p>Vi passade även på att göra koden lättare att jobba med, genom att specificera bitarna på ett mer läsbart sätt, och med den ändringen kunde vi enkelt stödja tre olika varianter av Tetris.</p><p>Hoppas du hade lika kul som jag 😃</p><p>Happy coding!</p></div>]]></content>
+</code></pre><p>Nice, all tests passed!</p><h2 id="summary">Summary</h2><p>In this third part, I took on the not entirely trivial task of computing all valid moves for a piece in its starting position.</p><p>I avoided implementing it as a recursive algorithm, since that would limit how large our boards can get.</p><p>We reminded ourselves that code should live where we expect to find it, so we moved <code>set-piece</code>, along with the new code, into <code>piece</code>.</p><p>We also took the opportunity to make the code easier to work with, by specifying pieces in a more readable way, and with that change we could easily support three different Tetris variants.</p><p>Hope you had just as much fun as I did 😃</p><p>Happy Coding!</p></div>]]></content>
   </entry>
   <entry>
     <id>https://tengstrand.github.io/blog/2026-01-11-tetris-playing-ai-the-polylith-way-2.html</id>
