@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Tetris-playing AI the Polylith way - Part 3</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link type="application/atom+xml" rel="alternate" href="atom.xml" title="Tetris-playing AI the Polylith way - Part 3">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+      /* Prevent jump by setting padding-top immediately */
+      body { padding-top: 50px !important; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-clojure.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-python.min.js"></script>
+    <script type="text/javascript" src="https://livejs.com/live.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism.min.css">
+
+
+
+    <!-- Social sharing (Facebook, Twitter, LinkedIn, etc.) -->
+    <meta name="title" content="Tetris-playing AI the Polylith way - Part 3">
+    <meta name="twitter:title" content="Tetris-playing AI the Polylith way - Part 3">
+    <meta property="og:title" content="Tetris-playing AI the Polylith way - Part 3">
+    <meta property="og:type" content="website">
+
+
+    <meta name="twitter:url" content="https://tengstrand.github.io/blog/2026-02-16-tetris-playing-ai-the-polylith-way-3.html">
+    <meta property="og:url" content="https://tengstrand.github.io/blog/2026-02-16-tetris-playing-ai-the-polylith-way-3.html">
+
+
+    <meta name="twitter:image" content="https://tengstrand.github.io/blog/assets/07-tetris-playing-ai-the-polylith-way/tetris-ai.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:image" content="https://tengstrand.github.io/blog/assets/07-tetris-playing-ai-the-polylith-way/tetris-ai.png">
+    <meta property="og:image:alt" content="">
+
+
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M04G8Y5PWB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-M04G8Y5PWB');
+    </script>
+  </head>
+  <body>
+
+    <div class="site-header">
+      <div class="wrapper">
+        <div class="site-nav">
+          <a class="page-link" href="index.html">Home</a>
+          <a class="page-link" href="archive.html">Archive</a>
+          <a class="page-link" href="tags/index.html">Tags</a>
+          
+	  <a class="page-link" href="atom.xml">
+            Feed
+          </a>
+          
+          
+        </div>
+        <div class="site-header-content">
+          <a href="index.html" style="text-decoration: none;">
+            <img src="assets/summer.jpeg" alt="Summer" class="site-header-image">
+          </a>
+          <div class="site-header-text">
+            <h1 class="site-title">
+              <a class="page-link" href="index.html">Tengstrand&#39;s Blog</a>
+            </h1>
+            <p>The search for simpler code while having fun.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper">
+
+      <h1>
+  
+  Tetris-playing AI the Polylith way - Part 3
+  
+</h1>
+<div><img src="assets/07-tetris-playing-ai-the-polylith-way/rotations.png" alt="Tetris AI" style="width: 60%; max-width: 180px; height: auto; display: block; margin: 16px 0;"><p>The focus in this third part of the blog series is to implement an algorithm that computes all valid moves for a piece (<a href="https://en.wikipedia.org/wiki/Tetromino">Tetromino</a>) in its starting position. We are refining our domain model and improving the readability of parts of the codebase, while continuing to implement the code in <a href="https://clojure.org/">Clojure</a> and <a href="https://www.python.org/">Python</a>  using the component-based <a href="https://polylith.gitbook.io/polylith/">Polylith</a> architecture.</p><p>Earlier parts:</p><ul><li><a href="05-tetris-playing-ai-the-polylith-way-1.html">Part 1</a> - Places a piece on a board. Shows the differences between Clojure and Python and creates the <code>piece</code> and <code>board</code> components.</li><li><a href="06-tetris-playing-ai-the-polylith-way-2.html">Part 2</a> - Implements clearing of completed rows. Shows how to get fast feedback when working REPL-driven.</li></ul><!-- end-of-preview --><p>The resulting source code from this post:</p><ul><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-03/langs/clojure/tetris-polylith">Clojure workspace</a></li><li>The <a href="https://github.com/tengstrand/tetrisanalyzer/tree/polylith-blog-part-03/langs/python/tetris-polylith-uv">Python workspace</a></li></ul><h2 id="tetris-variants">Tetris Variants</h2><p>Tetris has been made in several different variants, such as the handheld <a href="https://en.wikipedia.org/wiki/Game_Boy">Game Boy</a>, the <a href="https://en.wikipedia.org/wiki/Tetris_(NES_video_game)">Nintendo NES</a> console, and <a href="https://archive.org/details/arcade_atetris">this</a> Atari arcade game, which I played an unhealthy amount of in my younger days at a pool hall that no longer exists!</p><p>Each variant behaves slightly differently when it comes to colours, starting positions, rotation behaviour, and so on.</p><p>In most Tetris variants, the pieces start in these rotation states (lying flat) before they start falling:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/pieces.png" alt="Tetris pieces" style="width: 70%; max-width: 3000px; height: auto; display: block; margin: 16px 0;"><p>Where on the board the pieces start also varies. For instance, on Nintendo NES and Atari Arcade they start in the fifth x-position, while on Game Boy they start in the fourth:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/start-position.png" alt="Start position" style="width: 60%; max-width: 150px; height: auto; display: block; margin: 16px 0;"><p>In these older versions of Tetris, the pieces rotate only counterclockwise, unlike in some newer games where you can rotate both clockwise and counterclockwise.</p><p>The following table compares how pieces rotate across the three mentioned variants:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/rotation-table.png" alt="Rotation table" style="width: 100%; max-width: 250px; height: auto; display: block; margin: 16px 0;"><p>In Atari, pieces are oriented toward the top-left corner (except the vertical I), while in the other two they mostly rotate around their centre.</p><p>In our code, we represent a piece as four [x y] cells:</p><pre><code class="language-clojure">[[0 1] [1 1] [2 1] [1 2]]
+</code></pre><p>This representation is easy for the code to work with, but poorly communicates the shape of a piece to a human.</p><p>The main rule is that code should be written to be easy to understand for the people who read and change it (humans and AI agents).</p><p>Let us therefore define a piece like this instead:</p><pre><code class="language-clojure">(def T0 [&apos;---
+         &apos;xxx
+         &apos;-x-])
+</code></pre><p>Python:</p><pre><code class="language-python">T0 = [
+    &quot;---&quot;,
+    &quot;xxx&quot;,
+    &quot;-x-&quot;]
+</code></pre><p>Now we can define all seven pieces and their rotation states for Game Boy (<a href="https://github.com/tengstrand/tetrisanalyzer/blob/tetris-part3/langs/python/tetris-polylith-uv/components/tetrisanalyzer/piece/settings/game_boy.py">Python code</a> is almost identical):</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.settings.game-boy
+  (:require [tetrisanalyzer.piece.shape :as shape]))
+
+
+(def O0 [&apos;----
+         &apos;-xx-
+         &apos;-xx-
+         &apos;----])
+
+(def I0 [&apos;----
+         &apos;----
+         &apos;xxxx
+         &apos;----])
+
+(def I1 [&apos;-x--
+         &apos;-x--
+         &apos;-x--
+         &apos;-x--])
+
+(def Z0 [&apos;---
+         &apos;xx-
+         &apos;-xx])
+
+(def Z1 [&apos;-x-
+         &apos;xx-
+         &apos;x--])
+
+(def S0 [&apos;---
+         &apos;-xx
+         &apos;xx-])
+
+(def S1 [&apos;x--
+         &apos;xx-
+         &apos;-x-])
+
+(def J0 [&apos;---
+         &apos;xxx
+         &apos;--x])
+
+(def J1 [&apos;-xx
+         &apos;-x-
+         &apos;-x-])
+
+(def J2 [&apos;x--
+         &apos;xxx
+         &apos;---])
+
+(def J3 [&apos;-x-
+         &apos;-x-
+         &apos;xx-])
+
+(def L0 [&apos;---
+         &apos;xxx
+         &apos;x--])
+
+(def L1 [&apos;-x-
+         &apos;-x-
+         &apos;-xx])
+
+(def L2 [&apos;--x
+         &apos;xxx
+         &apos;---])
+
+(def L3 [&apos;xx-
+         &apos;-x-
+         &apos;-x-])
+
+(def T0 [&apos;---
+         &apos;xxx
+         &apos;-x-])
+
+(def T1 [&apos;-x-
+         &apos;-xx
+         &apos;-x-])
+
+(def T2 [&apos;-x-
+         &apos;xxx
+         &apos;---])
+
+(def T3 [&apos;-x-
+         &apos;xx-
+         &apos;-x-])
+
+(def pieces [[O0]
+             [I0 I1]
+             [Z0 Z1]
+             [S0 S1]
+             [J0 J1 J2 J3]
+             [L0 L1 L2 L3]
+             [T0 T1 T2 T3]])
+
+(def shapes (shape/shapes pieces))
+</code></pre><p>The <a href="https://github.com/tengstrand/tetrisanalyzer/blob/26685d9ed598917105c0095ee991b1d139af37c8/langs/clojure/tetris-polylith/components/piece/src/tetrisanalyzer/piece/shape.clj#L15">shapes</a> function at the end converts the pieces into the format the code uses:</p><pre><code class="language-clojure">[;; O
+ [[[1 1] [2 1] [1 2] [2 2]]]
+ ;; I
+ [[[0 2] [1 2] [2 2] [3 2]]
+  [[1 0] [1 1] [1 2] [1 3]]]
+ ;; Z
+ [[[0 1] [1 1] [1 2] [2 2]]
+  [[1 0] [0 1] [1 1] [0 2]]]
+ ;; S
+ [[[1 1] [2 1] [0 2] [1 2]]
+  [[0 0] [0 1] [1 1] [1 2]]]
+ ;; J
+ [[[0 1] [1 1] [2 1] [2 2]]
+  [[1 0] [2 0] [1 1] [1 2]]
+  [[0 0] [0 1] [1 1] [2 1]]
+  [[1 0] [1 1] [0 2] [1 2]]]
+ ;; L
+ [[[0 1] [1 1] [2 1] [0 2]]
+  [[1 0] [1 1] [1 2] [2 2]]
+  [[2 0] [0 1] [1 1] [2 1]]
+  [[0 0] [1 0] [1 1] [1 2]]]
+ ;; T
+ [[[0 1] [1 1] [2 1] [1 2]]
+  [[1 0] [1 1] [2 1] [1 2]]
+  [[1 0] [0 1] [1 1] [2 1]]
+  [[1 0] [0 1] [1 1] [1 2]]]]
+</code></pre><p>The test for the <code>shape</code> function looks like this:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.shape-test
+  (:require [clojure.test :refer :all]
+            [tetrisanalyzer.piece.shape :as shape]))
+
+(deftest converts-a-piece-shape-grid-to-a-vector-of-xy-cells
+  (is (= [[2 0]
+          [1 1]
+          [2 1]
+          [1 2]]
+         (shape/shape [&apos;--x-
+                       &apos;-xx-
+                       &apos;-x--
+                       &apos;----]))))
+</code></pre><p>Python:</p><pre><code class="language-python">from tetrisanalyzer.piece.shape import shape
+
+
+def test_converts_a_piece_shape_grid_to_a_list_of_xy_cells():
+    assert [[2, 0],
+            [1, 1],
+            [2, 1],
+            [1, 2]] == shape([&quot;--x-&quot;,
+                              &quot;-xx-&quot;,
+                              &quot;-x--&quot;,
+                              &quot;----&quot;]
+    )
+</code></pre><p>Implementation in Clojure:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.shape)
+
+(defn cell [x character y]
+  (when (= \x character)
+    [x y]))
+
+(defn row-cells [y row]
+  (keep-indexed #(cell %1 %2 y)
+                (str row)))
+
+(defn shape [piece-grid]
+  (vec (mapcat identity
+               (map-indexed row-cells piece-grid))))
+
+(defn shapes [piece-grids]
+  (mapv #(mapv shape %)
+        piece-grids))
+</code></pre><p>If you are new to Clojure, here are some explanatory examples of a couple of the functions:</p><pre><code class="language-clojure">(map-indexed vector [&quot;I&quot; &quot;love&quot; &quot;Tetris&quot;])
+
+;; ([0 &quot;I&quot;] [1 &quot;love&quot;] [2 &quot;Tetris&quot;])
+</code></pre><p>The <a href="https://clojuredocs.org/clojure.core/map-indexed">map-indexed</a> function iterates over &quot;I&quot;, &quot;love&quot;, and &quot;Tetris&quot;, and builds a new list where each element is created by calling <a href="https://clojuredocs.org/clojure.core/vector">vector</a> with the index, which is equivalent to:</p><pre><code class="language-clojure">(list (vector 0 &quot;I&quot;)
+      (vector 1 &quot;love&quot;)
+      (vector 2 &quot;tetris&quot;))
+
+;; ([0 &quot;I&quot;] [1 &quot;love&quot;] [2 &quot;Tetris&quot;])
+</code></pre><p>The function <a href="https://clojuredocs.org/clojure.core/keep-indexed">keep-indexed</a> works in the same way, but only keeps values that aren&apos;t nil, hence the use of <a href="https://clojuredocs.org/clojure.core/when">when</a>:</p><pre><code class="language-clojure">;; %1 = first argument (index)
+;; %2 = second argument (value)
+(keep-indexed #(when %2 [%1 %2]) 
+              [&quot;I&quot; nil &quot;Tetris&quot;])
+
+;; ([0 &quot;I&quot;] [2 &quot;Tetris&quot;])
+</code></pre><p>Implementation in Python:</p><pre><code class="language-python">def shape(piece_grid):
+    return [
+        [x, y]
+        for y, row in enumerate(piece_grid)
+        for x, ch in enumerate(row)
+        if ch == &quot;x&quot;]
+
+def shapes(pieces_grids):
+    return [
+        [shape(piece_grid) for piece_grid in piece_grids]
+        for piece_grids in pieces_grids]
+</code></pre><p>Here we use <a href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions">list comprehension</a> to convert the data into [x, y] cells. The <a href="https://docs.python.org/3/library/functions.html#enumerate">enumerate</a> function is equivalent to Clojure’s <a href="https://clojuredocs.org/clojure.core/map-indexed">map-indexed</a>, in that it adds an index (0, 1, 2, …) to each element.</p><h2 id="domain-modelling">Domain Modelling</h2><p>The new code that calculates the valid moves for a piece in its starting position has to live somewhere. We need to be able to move and rotate a <code>piece</code>, and check whether the target position on the <code>board</code> is free.</p><p>In object-oriented programming we have several options. We could write <code>piece.set(board)</code>, <code>board.set(piece)</code>, or maybe <code>move.set(piece, board)</code>, while making every effort not to expose the internal representation.</p><p>In functional programming, we have more freedom and don&apos;t try to hide how we represent our data. The fact that the board is stored as a two-dimensional vector is no secret, and it isn’t just board that can create updated copies of this two-dimensional vector.</p><p>Code usually belongs where we expect to find it. We have the function <code>set-piece</code>, which, according to this reasoning, should live in <code>piece</code>, so I moved it from <code>board</code> where I&apos;d put it earlier. The new <code>placements</code> function also goes in <code>piece</code>, since it&apos;s about finding valid moves for a piece. Our domain model now looks like this:</p><img src="assets/07-tetris-playing-ai-the-polylith-way/components.png?v=3" alt="Components" style="width: 80%; max-width: 200px; height: auto; display: block; margin: 16px 0;"><p>Inside each component we list what belongs to its interface (what&apos;s public), and the arrow shows that <code>piece</code> calls functions in <code>board</code>.</p><p>We split the implementation across the namespaces <code>move</code>, <code>placement</code>, and <code>visit</code>, which we put in the <code>move</code> package:</p><pre><code class="language-shell">▾ tetris-polylith
+  ▸ bases
+  ▾ components
+    ▸ board
+    ▾ piece
+      ▾ src
+        ▸ settings
+        ▾ move
+          move.clj
+          placement.clj
+          visit.clj
+        bitmask.clj
+        interface.clj
+        piece.clj
+        shape.clj
+      ▾ test
+        ▾ move
+          move_test.clj
+          placement_test.clj
+          visit_test.clj
+        piece_test.clj
+        shape_test.clj
+  ▸ development
+  ▸ projects
+</code></pre><p>The <code>move-test</code> looks like this:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.move-test
+  (:require [clojure.test :refer :all]
+            [tetrisanalyzer.piece.piece :as piece]
+            [tetrisanalyzer.piece.move.move :as move]
+            [tetrisanalyzer.piece.bitmask :as bitmask]
+            [tetrisanalyzer.board.interface :as board]
+            [tetrisanalyzer.piece.settings.atari-arcade :as atari-arcade]))
+
+(def x 2)
+(def y 1)
+(def rotation 0)
+(def S piece/S)
+(def shapes atari-arcade/shapes)
+(def bitmask (bitmask/rotation-bitmask shapes S))
+(def piece (piece/piece S rotation shapes))
+
+(def board (board/board [&apos;xxxxxxxx
+                         &apos;xxx--xxx
+                         &apos;xx--xxxx
+                         &apos;xxxxxxxx]))
+
+(deftest valid-move
+  (is (= true
+         (move/valid-move? board x y S rotation shapes))))
+
+(deftest valid-left-move
+  (is (= [2 1 0]
+         (move/left board (inc x) y S rotation nil shapes))))
+
+(deftest invalid-left-move
+  (is (= nil
+         (move/left board x y S rotation nil shapes))))
+
+(deftest valid-right-move
+  (is (= [2 1 0]
+         (move/right board (dec x) y S rotation nil shapes))))
+
+(deftest invalid-right-move
+  (is (= nil
+         (move/right board x (dec y) S rotation nil shapes))))
+
+(deftest unoccupied-down-move
+  (is (= [[2 1 0] nil]
+         (move/down board x (dec y) S rotation nil shapes))))
+
+(deftest down-move-hits-ground
+  (is (= [nil [[2 1 0]]]
+         (move/down board x y S rotation nil shapes))))
+
+(deftest valid-rotation
+  (is (= [2 1 0]
+         (move/rotate board x y S (dec rotation) bitmask shapes))))
+
+(deftest invalid-rotation-without-kick
+  (is (= nil
+         (move/rotate board (inc x) y S (inc rotation) bitmask shapes))))
+
+(deftest valid-rotation-with-kick
+  (is (= [2 1 0]
+         (move/rotate-with-kick board (inc x) y S (inc rotation) bitmask shapes))))
+
+(deftest invalid-move-outside-board
+  (is (= false
+         (move/valid-move? board 10 -10 S rotation shapes))))
+</code></pre><p>The first test, <code>valid-move</code>, checks that the S piece:</p><pre><code class="language-clojure">[&apos;-xx
+ &apos;xx-]
+</code></pre><p>Can be placed at position x=2, y=1, on the board:</p><pre><code class="language-clojure">[&apos;xxxxxxxx
+ &apos;xxx--xxx
+ &apos;xx--xxxx
+ &apos;xxxxxxxx]
+</code></pre><p>Beyond that, we test various valid moves and rotations into the empty area, plus invalid moves outside the board.</p><p>In Tetris there&apos;s something called kick, or <a href="https://harddrop.com/wiki/Wall_kick">wall kick</a>. When you rotate a piece and that position is occupied on the board, one step left is also tried (x-1). On <a href="https://en.wikipedia.org/wiki/Nintendo_Entertainment_System">Nintendo NES</a> this is turned off, while it&apos;s enabled in the other two variants we support here. In newer Tetris games, other placements besides x-1 are sometimes tested as well.</p><p>The implementation looks like this:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.move
+  (:require [tetrisanalyzer.piece.piece :as piece]))
+
+(defn cell [board x y [cx cy]]
+  (or (get-in board [(+ y cy) (+ x cx)])
+      piece/X))
+
+(defn valid-move? [board x y p rotation shapes]
+  (every? zero?
+          (map #(cell board x y %)
+               (piece/piece p rotation shapes))))
+
+(defn left [board x y p rotation _ shapes]
+  (when (valid-move? board (dec x) y p rotation shapes)
+    [(dec x) y rotation]))
+
+(defn right [board x y p rotation _ shapes]
+  (when (valid-move? board (inc x) y p rotation shapes)
+    [(inc x) y rotation]))
+
+(defn down
+  &quot;Returns [down-move placement] where:
+   - down-move: next move when moving down or nil if blocked
+   - placement: final placement if blocked, or nil if can move down&quot;
+  [board x y p rotation _ shapes]
+  (if (valid-move? board x (inc y) p rotation shapes)
+    [[x (inc y) rotation] nil]
+    [nil [[x y rotation]]]))
+
+(defn rotate [board x y p rotation bitmask shapes]
+  (let [new-rotation (bit-and (inc rotation) bitmask)]
+    (when (valid-move? board x y p new-rotation shapes)
+      [x y new-rotation])))
+
+(defn rotate-with-kick [board x y p rotation bitmask shapes]
+  (or (rotate board x y p rotation bitmask shapes)
+      (rotate board (dec x) y p rotation bitmask shapes)))
+
+(defn rotation-fn [rotation-kick?]
+  (if rotation-kick?
+    rotate-with-kick
+    rotate))
+</code></pre><p>The functions are fairly straightforward, so let us instead look at the code that helps us keep track of which moves have already been visited:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.visit)
+
+(defn visited? [visited-moves x y rotation]
+  (if-let [visited-rotations (get-in visited-moves [y x])]
+    (not (zero? (bit-and visited-rotations
+                         (bit-shift-left 1 rotation))))
+    true)) ;; Cells outside the board are treated as visited
+
+(defn visit [visited-moves x y rotation]
+  (assoc-in visited-moves [y x] (bit-or (get-in visited-moves [y x])
+                                        (bit-shift-left 1 rotation))))
+</code></pre><p>Calling the standard <a href="https://clojuredocs.org/clojure.core/bit-shift-left">bit-shift-left</a> function returns a set bit in one of the four lowest bits:</p><table><thead><tr><th style="text-align:center;">rotation</th><th style="text-align:center;">bit</th></tr></thead><tbody><tr><td style="text-align:center;">0</td><td style="text-align:center;"><code>0001</code></td></tr><tr><td style="text-align:center;">1</td><td style="text-align:center;"><code>0010</code></td></tr><tr><td style="text-align:center;">2</td><td style="text-align:center;"><code>0100</code></td></tr><tr><td style="text-align:center;">3</td><td style="text-align:center;"><code>1000</code></td></tr></tbody></table><p>These &quot;flags&quot; are used to mark that we&apos;ve visited a given [x y rotation] move on the board. Note that we pass a &quot;visited board&quot; (<code>visited-moves</code>) into <code>visit</code> and get back a copy where the [x y] cell has a bit set for the given rotation. This “copying” is very fast and memory-efficient, see “structural sharing” under <a href="https://clojure.org/reference/data_structures">Data Structures</a>.</p><p>The tests look like the following:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.visit-test
+  (:require [clojure.test :refer :all]
+            [tetrisanalyzer.piece.move.visit :as visit]))
+
+(def x 2)
+(def y 1)
+(def rotation 3)
+(def unvisited [[0 0 0 0]
+                [0 0 0 0]])
+
+(deftest move-is-not-visited
+  (is (= false
+         (visit/visited? unvisited x y rotation))))
+
+(deftest move-is-visited
+  (let [visited (visit/visit unvisited x y rotation)]
+    (is (= true
+           (visit/visited? visited x y rotation)))))
+</code></pre><p>Python:</p><pre><code class="language-python">from tetrisanalyzer.piece.move.visit import is_visited, visit
+
+X = 2
+Y = 1
+ROTATION = 3
+UNVISITED = [
+    [0, 0, 0, 0],
+    [0, 0, 0, 0]]
+
+
+def test_move_is_not_visited():
+    assert is_visited(UNVISITED, X, Y, ROTATION) is False
+
+
+def test_move_is_visited():
+    visited = [row[:] for row in UNVISITED]
+    visit(visited, X, Y, ROTATION)
+    assert is_visited(visited, X, Y, ROTATION) is True
+</code></pre><p>We have now laid the groundwork to implement the <code>placements</code> function that computes all valid moves for a piece in its starting position.</p><p>We start with the test:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.placement-test
+  (:require [clojure.test :refer :all]
+            [tetrisanalyzer.piece.piece :as piece]
+            [tetrisanalyzer.piece.move.placement :as placement]
+            [tetrisanalyzer.piece.settings.atari-arcade :as atari-arcade]))
+
+(def start-x 2)
+(def sorter (juxt second first last))
+
+(def board [[0 0 0 0 0 0]
+            [0 0 1 1 0 0]
+            [0 0 1 0 0 1]
+            [0 0 1 1 1 1]])
+
+(def shapes atari-arcade/shapes)
+
+;; Start position of the J piece:
+;; --JJJ-
+;; --xxJ-
+;; --x--x
+;; --xxxx
+(deftest placements--without-rotation-kick
+  (is (= [[2 0 0]
+          [3 0 0]]
+         (sort-by sorter (placement/placements board piece/J start-x false shapes)))))
+
+;; With rotation kick, checking if x-1 fits:
+;; -JJ---
+;; -Jxx--
+;; -Jx--x
+;; --xxxx
+(deftest placements--with-rotation-kick
+  (is (= [[1 0 1]
+          [2 0 0]
+          [3 0 0]
+          [0 1 1]]
+         (sort-by sorter (placement/placements board piece/J start-x true shapes)))))
+</code></pre><p>This tests that we get back the valid [x y rotation] positions where a piece can be placed on the board from its starting position.</p><p>The implementation:</p><pre><code class="language-clojure">(ns tetrisanalyzer.piece.move.placement
+  (:require [tetrisanalyzer.piece.move.move :as move]
+            [tetrisanalyzer.piece.move.visit :as visit]
+            [tetrisanalyzer.board.interface :as board]
+            [tetrisanalyzer.piece.bitmask :as bitmask]))
+
+(defn -&gt;placements [board x y p rotation bitmask valid-moves visited-moves rotation-fn shapes]
+  (loop [next-moves (list [x y rotation])
+         placements []
+         valid-moves valid-moves
+         visited-moves visited-moves]
+    (if-let [[x y rotation] (first next-moves)]
+      (let [next-moves (rest next-moves)]
+        (if (visit/visited? visited-moves x y rotation)
+          (recur next-moves placements valid-moves visited-moves)
+          (let [[down placement] (move/down board x y p rotation bitmask shapes)
+                moves (keep #(% board x y p rotation bitmask shapes)
+                            [move/left
+                             move/right
+                             rotation-fn
+                             (constantly down)])]
+            (recur (into next-moves moves)
+                   (concat placements placement)
+                   (conj valid-moves [x y rotation])
+                   (visit/visit visited-moves x y rotation)))))
+      placements)))
+
+(defn placements [board p x kick? shapes]
+  (let [y 0
+        rotation 0
+        bitmask (bitmask/rotation-bitmask shapes p)
+        visited-moves (board/empty-board board)
+        rotation-fn (move/rotation-fn kick?)]
+    (if (move/valid-move? board x y p rotation shapes)
+      (-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)
+      [])))
+</code></pre><p>Let us walk through the following section in <code>-&gt;placements</code>:</p><pre><code class="language-clojure">(loop [next-moves (list [x y rotation])
+       placements []
+       valid-moves valid-moves
+       visited-moves visited-moves]
+</code></pre><p>These four lines initialise the data we&apos;re looping over: <code>next-moves</code> is the list of moves we need to process (it grows and shrinks as we go), and <code>placements</code> accumulates valid moves.</p><p>Since Clojure doesn’t support <a href="https://en.wikipedia.org/wiki/Tail_call">tail recursion</a>, we use <a href="https://clojuredocs.org/clojure.core/loop">loop</a> instead, to avoid stack overflow on boards larger than 10×20.</p><pre><code class="language-clojure">(if-let [[x y rotation] (first next-moves)]
+</code></pre><p>Retrieves the next move from <code>next-moves</code> and continues with the code immediately after, or returns <code>placements</code> (the last line in the function, representing all valid moves) if <code>next-moves</code> is empty.</p><pre><code class="language-clojure">(let [next-moves (rest next-moves)]
+</code></pre><p>Drops the first element from <code>next-moves</code>, the one we just picked.</p><pre><code class="language-clojure">(if (visit/visited? visited-moves x y rotation)
+</code></pre><p>If we&apos;ve already visited this move, continue with:</p><pre><code class="language-clojure">(recur next-moves placements valid-moves visited-moves)
+</code></pre><p>Which continues our search for valid moves (the line after <code>(loop [...]</code>) by moving on to the next move to evaluate.</p><p>Otherwise, if the move hasn&apos;t been visited, we do:</p><pre><code class="language-clojure">(let [[down placement] (move/down board x y p rotation bitmask shapes)
+     ...]
+</code></pre><p>This sets <code>down</code> to the next downward move (if free) or <code>placement</code> if we can&apos;t move down, which happens when we hit the bottom or when part of the &quot;stack&quot; is in the way.</p><p>For these lines:</p><pre><code class="language-clojure">(keep #(% board x y p rotation bitmask shapes)
+      [move/left
+       move/right
+       rotation-fn
+       (constantly down)])
+</code></pre><p>The <code>%</code> gets replaced with each function in the vector, which is equivalent to:</p><pre><code class="language-clojure">[(move/left board x y p rotation bitmask shapes)
+ (move/right board x y p rotation bitmask shapes)
+ (rotation-fn board x y p rotation bitmask shapes)
+ (down board x y p rotation bitmask shapes)]
+</code></pre><p>These function calls generate all possible moves (including rotations), returning [x y rotation] for positions that are free on the board, or nil if occupied. The <a href="https://clojuredocs.org/clojure.core/keep">keep</a> function filters out <code>nil</code> values, leaving only valid moves in <code>moves</code>.</p><p>Finally we execute:</p><pre><code class="language-clojure">(recur (into next-moves moves)
+       (concat placements placement)
+       (conj valid-moves [x y rotation])
+       (visit/visit visited-moves x y rotation))
+</code></pre><p>Which calls <code>loop</code> again with:</p><ul><li><code>next-moves</code> updated with any new moves</li><li><code>placements</code> updated with any valid placement</li><li><code>valid-moves</code> updated with the current move</li><li><code>visited-moves</code> with the current move marked as visited</li></ul><p>This keeps going until <code>next-moves</code> is empty, and then we return <code>placements</code>.</p><p>The function that kicks everything off and returns valid moves for a piece in its starting position:</p><pre><code class="language-clojure">(defn placements [board p x kick? shapes]
+  (let [y 0
+        rotation 0
+        bitmask (bitmask/rotation-bitmask shapes p)
+        visited-moves (board/empty-board board)
+        rotation-fn (move/rotation-fn kick?)]
+    (if (move/valid-move? board x y p rotation shapes)
+      (-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)
+      [])))
+</code></pre><ul><li><code>board</code>: a two-dimensional vector representing the board, usually 10x20.</li><li><code>p</code>: piece index (0, 1, 2, 3, 4, 5, or 6).</li><li><code>x</code>: which column the 4x4 grid starts in (where the piece sits). First column is 0.</li><li><code>y</code>: set to 0 (top row for the 4x4 grid).</li><li><code>rotation</code>: set to 0 (starting rotation).</li><li><code>bitmask</code>: used when iterating over rotations so that it wraps back to 0 after reaching the maximum number of rotations it can perform.</li><li><code>visited-moves</code>: has the same structure as a board, a two-dimensional array, usually 10x20.</li><li><code>rotation-fn</code>: returns the right rotation function depending on whether kick is enabled. Also tries position x-1 if <code>kick?</code> is true.</li><li><code>shapes</code>: the shapes for all pieces and their rotation states, stored as [x y] cells.</li><li><code>(if (move/valid-move? board x y p rotation shapes)</code>: we need to check whether the initial position is free; if not, return an empty vector.</li><li><code>(-&gt;placements board x y p rotation bitmask [] visited-moves rotation-fn shapes)</code> computes the valid moves.</li></ul><p>Implementation in Python:</p><pre><code class="language-python">from collections import deque
+
+from tetrisanalyzer import board as board_ifc
+from tetrisanalyzer.piece import piece
+from tetrisanalyzer.piece.bitmask import rotation_bitmask
+from tetrisanalyzer.piece.move import move
+from tetrisanalyzer.piece.move import visit
+
+def _placements(board, x, y, p, rotation, bitmask, valid_moves, visited_moves, rotation_move_fn, shapes):
+    next_moves = deque([[x, y, rotation]])
+    valid_placements = []
+
+    while next_moves:
+        x, y, rotation = next_moves.popleft()
+
+        if visit.is_visited(visited_moves, x, y, rotation):
+            continue
+
+        down_move, placement = move.down(board, x, y, p, rotation, bitmask, shapes)
+
+        moves = [
+            move.left(board, x, y, p, rotation, bitmask, shapes),
+            move.right(board, x, y, p, rotation, bitmask, shapes),
+            rotation_move_fn(board, x, y, p, rotation, bitmask, shapes),
+            down_move]
+
+        moves = [m for m in moves if m is not None]
+
+        next_moves.extend(moves)
+
+        if placement is not None:
+            valid_placements.extend(placement)
+
+        valid_moves.append([x, y, rotation])
+        visit.visit(visited_moves, x, y, rotation)
+
+    return valid_placements
+
+
+def placements(board, p, start_x, kick, shapes):
+    y = 0
+    rotation = 0
+    bitmask = rotation_bitmask(shapes, p)
+    visited_moves = board_ifc.empty_board(board_ifc.width(board), board_ifc.height(board))
+    rotation_move_fn = move.rotation_fn(kick)
+
+    if not move.is_valid_move(board, start_x, y, p, rotation, shapes):
+        return []
+
+    return _placements(board, start_x, y, p, rotation, bitmask, [], visited_moves, rotation_move_fn, shapes)
+</code></pre><p>The code follows the same algorithm as in Clojure. We use <a href="https://docs.python.org/3/library/collections.html#collections.deque">deque</a> because it&apos;s slightly faster than a list when performing both <code>popleft</code> and <code>extend</code>.</p><h2 id="testing">Testing</h2><p>Finally, we run our tests:</p><pre><code class="language-clojure">$&gt; cd ~/source/tetrisanalyzer/langs/clojure/tetris-polylith
+$&gt; poly test :dev
+Projects to run tests from: development
+
+Running tests for the development project using test runner: Polylith built-in clojure.test runner...
+Running tests from the development project, including 2 bricks: board, piece
+
+Testing tetrisanalyzer.board.core-test
+
+Ran 1 tests containing 1 assertions.
+0 failures, 0 errors.
+
+Test results: 1 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.board.clear-rows-test
+
+Ran 1 tests containing 1 assertions.
+0 failures, 0 errors.
+
+Test results: 1 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.board.grid-test
+
+Ran 2 tests containing 2 assertions.
+0 failures, 0 errors.
+
+Test results: 2 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.piece.shape-test
+
+Ran 1 tests containing 1 assertions.
+0 failures, 0 errors.
+
+Test results: 1 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.piece.move.placement-test
+
+Ran 2 tests containing 2 assertions.
+0 failures, 0 errors.
+
+Test results: 2 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.piece.move.move-test
+
+Ran 11 tests containing 11 assertions.
+0 failures, 0 errors.
+
+Test results: 11 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.piece.move.visit-test
+
+Ran 2 tests containing 2 assertions.
+0 failures, 0 errors.
+
+Test results: 2 passes, 0 failures, 0 errors.
+
+Testing tetrisanalyzer.piece.piece-test
+
+Ran 1 tests containing 1 assertions.
+0 failures, 0 errors.
+
+Test results: 1 passes, 0 failures, 0 errors.
+
+Execution time: 0 seconds
+</code></pre><p>Python:</p><pre><code class="language-python">$&gt; cd ~/source/tetrisanalyzer/langs/python/tetris-polylith-uv
+$&gt; uv run pytest
+======================================================================================================= test session starts ========================================================================================================
+platform darwin -- Python 3.13.11, pytest-9.0.2, pluggy-1.6.0
+rootdir: /Users/tengstrand/source/tetrisanalyzer/langs/python/tetris-polylith-uv
+configfile: pyproject.toml
+collected 21 items
+
+test/components/tetrisanalyzer/board/test_clear_rows.py .                                                                                                                                                                    [  4%]
+test/components/tetrisanalyzer/board/test_core.py ..                                                                                                                                                                         [ 14%]
+test/components/tetrisanalyzer/board/test_grid.py ..                                                                                                                                                                         [ 23%]
+test/components/tetrisanalyzer/piece/move/test_move.py ...........                                                                                                                                                           [ 76%]
+test/components/tetrisanalyzer/piece/move/test_placement.py ..                                                                                                                                                               [ 85%]
+test/components/tetrisanalyzer/piece/move/test_visit.py ..                                                                                                                                                                   [ 95%]
+test/components/tetrisanalyzer/piece/test_shape.py .                                                                                                                                                                         [100%]
+
+======================================================================================================== 21 passed in 0.02s ========================================================================================================
+</code></pre><p>Nice, all tests passed!</p><h2 id="summary">Summary</h2><p>In this third part, I took on the not entirely trivial task of computing all valid moves for a piece in its starting position.</p><p>I avoided implementing it as a recursive algorithm, since that would limit how large our boards can get.</p><p>We reminded ourselves that code should live where we expect to find it.</p><p>We also took the opportunity to make the code easier to work with, by specifying pieces in a more readable way, and with that change we could easily support three different Tetris variants.</p><p>Hope you had just as much fun as I did 😃</p><p>Happy Coding!</p></div>
+
+<p><i>Published: 2026-02-16</i></p>
+
+<p>
+  <i>
+  Tagged:
+  
+  <span class="tag">
+    <a href="tags/clojure.html">clojure</a>
+  </span>
+  
+  <span class="tag">
+    <a href="tags/polylith.html">polylith</a>
+  </span>
+  
+  <span class="tag">
+    <a href="tags/tetris.html">tetris</a>
+  </span>
+  
+  <span class="tag">
+    <a href="tags/ai.html">ai</a>
+  </span>
+  
+  <span class="tag">
+    <a href="tags/python.html">python</a>
+  </span>
+  
+  </i>
+</p>
+
+
+<!-- Hypothesis for text-selection comments (Medium-like) -->
+<script src="https://hypothes.is/embed.js" async></script>
+
+<!-- Giscus for discussion comments -->
+<script src="https://giscus.app/client.js"
+        data-repo="tengstrand/blog"
+        data-repo-id="R_kgDOQjTxDg"
+        data-category="Comments"
+        data-category-id="DIC_kwDOQjTxDs4Czh6g"
+        data-mapping="url"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light_high_contrast"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+<noscript>Please enable JavaScript to view the comments powered by Giscus.</noscript>
+
+
+    </div>
+    <script>
+      // Make navigation menu sticky using JavaScript
+      (function() {
+        function initStickyNav() {
+          var nav = document.querySelector('.site-nav');
+          if (!nav) {
+            // Retry after a short delay if nav not found
+            setTimeout(initStickyNav, 100);
+            return;
+          }
+          
+          // Check if already initialized
+          if (document.querySelector('.sticky-nav-wrapper')) return;
+          
+          // Get nav position and dimensions
+          var navRect = nav.getBoundingClientRect();
+          var navTop = navRect.top + window.pageYOffset;
+          
+          // Hide the original nav
+          nav.style.visibility = 'hidden';
+          nav.style.position = 'absolute';
+          
+          // Create a sticky wrapper with full-width background
+          var stickyWrapper = document.createElement('div');
+          stickyWrapper.className = 'sticky-nav-wrapper';
+          stickyWrapper.style.position = 'fixed';
+          stickyWrapper.style.top = '0';
+          stickyWrapper.style.left = '0';
+          stickyWrapper.style.right = '0';
+          stickyWrapper.style.width = '100%';
+          stickyWrapper.style.backgroundColor = 'white';
+          stickyWrapper.style.zIndex = '100';
+          stickyWrapper.style.boxShadow = 'none';
+          stickyWrapper.style.borderTop = 'none';
+          stickyWrapper.style.borderBottom = 'none';
+          
+          // Create inner wrapper for centered content
+          var innerWrapper = document.createElement('div');
+          innerWrapper.style.maxWidth = '600px';
+          innerWrapper.style.margin = '0 auto';
+          innerWrapper.style.padding = '0 15px';
+          innerWrapper.style.width = '100%';
+          innerWrapper.style.boxSizing = 'border-box';
+          innerWrapper.style.paddingTop = '0px';
+          innerWrapper.style.paddingBottom = '2px';
+          innerWrapper.style.borderBottom = '1px solid #e8e8e8';
+          
+          // Add white space below the gray line with a shorter fade
+          stickyWrapper.style.paddingBottom = '8px';
+          stickyWrapper.style.background = 'linear-gradient(to bottom, white 0%, white calc(100% - 8px), transparent 100%)';
+          stickyWrapper.appendChild(innerWrapper);
+          
+          // Clone nav and put it in inner wrapper (always visible)
+          var navClone = nav.cloneNode(true);
+          navClone.style.visibility = 'visible';
+          navClone.style.position = 'static';
+          navClone.style.marginTop = '0';
+          navClone.style.paddingTop = '5px';
+          innerWrapper.appendChild(navClone);
+          document.body.insertBefore(stickyWrapper, document.body.firstChild);
+          
+          // Hide site-header border-top to remove black line
+          var siteHeader = document.querySelector('.site-header');
+          if (siteHeader) {
+            siteHeader.style.borderTop = 'none';
+          }
+          
+          // Set body padding-top immediately to prevent jump
+          var stickyHeight = stickyWrapper.offsetHeight || 50;
+          document.body.style.paddingTop = stickyHeight + 'px';
+        }
+        
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initStickyNav);
+        } else {
+          // Small delay to ensure everything is loaded
+          setTimeout(initStickyNav, 50);
+        }
+      })();
+    </script>
+  </body>
+</html>
